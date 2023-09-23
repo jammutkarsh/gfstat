@@ -19,4 +19,5 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	AnyToJSON(data)
 }

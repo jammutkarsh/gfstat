@@ -8,7 +8,7 @@ import (
 
 // GitHubAPI is the response from the GitHub API
 type GitHubAPI struct {
-	Username             string `json:"login"`
+	Username          string `json:"login"`
 	Type              string `json:"type"`
 	HTMLURL           string `json:"html_url"`
 	FollowersURL      string `json:"followers_url"`
