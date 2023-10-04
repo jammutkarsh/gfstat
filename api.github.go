@@ -5,28 +5,43 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"time"
 )
 
 // GitHubAPI is the response from the GitHub API
 type GitHubAPI struct {
-	Username          string `json:"login"`
-	Type              string `json:"type"`
-	HTMLURL           string `json:"html_url"`
-	FollowersURL      string `json:"followers_url"`
-	FollowingURL      string `json:"following_url"`
-	ID                int    `json:"id"`
-	NodeID            string `json:"node_id"`
-	AvatarURL         string `json:"avatar_url"`
-	GravatarID        string `json:"gravatar_id"`
-	URL               string `json:"url"`
-	GistsURL          string `json:"gists_url"`
-	StarredURL        string `json:"starred_url"`
-	SubscriptionsURL  string `json:"subscriptions_url"`
-	OrganizationsURL  string `json:"organizations_url"`
-	ReposURL          string `json:"repos_url"`
-	EventsURL         string `json:"events_url"`
-	ReceivedEventsURL string `json:"received_events_url"`
-	SiteAdmin         bool   `json:"site_admin"`
+	Username          string    `json:"login"`
+	ID                int       `json:"id"`
+	NodeID            string    `json:"node_id"`
+	AvatarURL         string    `json:"avatar_url"`
+	GravatarID        string    `json:"gravatar_id"`
+	URL               string    `json:"url"`
+	HTMLURL           string    `json:"html_url"`
+	FollowersURL      string    `json:"followers_url"`
+	FollowingURL      string    `json:"following_url"`
+	GistsURL          string    `json:"gists_url"`
+	StarredURL        string    `json:"starred_url"`
+	SubscriptionsURL  string    `json:"subscriptions_url"`
+	OrganizationsURL  string    `json:"organizations_url"`
+	ReposURL          string    `json:"repos_url"`
+	EventsURL         string    `json:"events_url"`
+	ReceivedEventsURL string    `json:"received_events_url"`
+	Type              string    `json:"type"`
+	SiteAdmin         bool      `json:"site_admin"`
+	Name              string    `json:"name"`
+	Company           string    `json:"company"`
+	Blog              string    `json:"blog"`
+	Location          string    `json:"location"`
+	Email             string    `json:"email"`
+	Hireable          bool      `json:"hireable"`
+	Bio               string    `json:"bio"`
+	TwitterUsername   string    `json:"twitter_username"`
+	PublicRepos       int       `json:"public_repos"`
+	PublicGists       int       `json:"public_gists"`
+	Followers         int       `json:"followers"`
+	Following         int       `json:"following"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
 }
 
 // GETUserData retrieves the user data from the GitHub API
@@ -36,6 +51,10 @@ func (g *GitHubAPI) GETUserData(username string) (err error) {
 		return err
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return errors.New("Error: User Not Found")
+	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -60,7 +79,7 @@ func (g GitHubAPI) GETFollowers(p *CurrentUser) error {
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		return errors.New("Error: User Not Found")
+		return errors.New("Error: Couldn't find followers")
 	}
 
 	body, err := io.ReadAll(response.Body)
@@ -91,7 +110,7 @@ func (g GitHubAPI) GETFollowing(c *CurrentUser) error {
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		return errors.New("Error: User Not Found")
+		return errors.New("Error: Couldn't find following")
 	}
 
 	body, err := io.ReadAll(response.Body)

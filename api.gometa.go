@@ -20,10 +20,16 @@ type MetaFollow struct {
 // to simplify the data structure and is subject to change based on needs.
 type CurrentUser struct {
 	Username  string       `json:"username"`
-	Type      AccountType  `json:"type"` // User or Organization
+	Type      string       `json:"type"` // User or Organization
 	HTMLURL   string       `json:"html_url"`
 	Followers []MetaFollow `json:"followers"`
 	Following []MetaFollow `json:"following"`
+}
+
+func (c *CurrentUser) setMetadata(username, htmlURL, accountType string) {
+	c.Username = username
+	c.HTMLURL = htmlURL
+	c.Type = accountType
 }
 
 // FollowDiff gives a intersection of CurrentUser.Followers and CurrentUser.Following

@@ -8,7 +8,7 @@ import (
 
 // AnyToJSON converts any type to JSON string.
 // The any type is used instead of a specific struct type to allow for flexibility.
-// Primiarly used for printing, debugging and testing purposes.
+// Primiarly used for printing, debugging, testing purposes and possibly in future sending the data to a client.
 func AnyToJSON(v any) {
 	jsonData, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
