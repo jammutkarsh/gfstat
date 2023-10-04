@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 )
@@ -47,6 +48,68 @@ func (g *GitHubAPI) GETUserData(username string) (err error) {
 
 	// Remove the trailing "{/other_user}" from the URL
 	g.FollowingURL = g.FollowingURL[:len(g.FollowingURL)-len("{/other_user}")]
+
+	return nil
+}
+
+func (g GitHubAPI) GETFollowers(p *CurrentUser) error {
+	response, err := http.Get(g.FollowersURL)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return errors.New("Error: User Not Found")
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+
+	var followersGitHubData []GitHubAPI
+	if err := json.Unmarshal(body, &followersGitHubData); err != nil {
+		return err
+	}
+
+	for _, v := range followersGitHubData {
+		p.Followers = append(p.Followers, MetaFollow{
+			Username: v.Username,
+			HTMLURL:  v.HTMLURL,
+		})
+	}
+
+	return nil
+}
+
+func (g GitHubAPI) GETFollowing(c *CurrentUser) error {
+	response, err := http.Get(g.FollowingURL)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return errors.New("Error: User Not Found")
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+
+	var followingGitHubData []GitHubAPI
+	if err := json.Unmarshal(body, &followingGitHubData); err != nil {
+		return err
+	}
+
+	for _, v := range followingGitHubData {
+		c.Following = append(c.Following, MetaFollow{
+			Username: v.Username,
+			HTMLURL:  v.HTMLURL,
+		})
+	}
 
 	return nil
 }

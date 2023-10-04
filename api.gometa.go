@@ -1,8 +1,15 @@
 package main
 
+type AccountType int
+
+const (
+	User AccountType = iota
+	Organization
+)
+
 // MetaFollow stands for metadata of a follower/following.
 type MetaFollow struct {
-	Username string `json:"login"`
+	Username string `json:"username"`
 	HTMLURL  string `json:"html_url"`
 }
 
@@ -11,8 +18,15 @@ type MetaFollow struct {
 // instead of having to make multiple API calls.
 // This struct follows created for the same reason as UserProfile,
 // to simplify the data structure and is subject to change based on needs.
-type GoUserProfile struct {
-	CurrentUser string
-	Followers   []MetaFollow
-	Following   []MetaFollow
+type CurrentUser struct {
+	Username  string       `json:"username"`
+	Type      AccountType  `json:"type"` // User or Organization
+	HTMLURL   string       `json:"html_url"`
+	Followers []MetaFollow `json:"followers"`
+	Following []MetaFollow `json:"following"`
+}
+
+// FollowDiff gives a intersection of CurrentUser.Followers and CurrentUser.Following
+func (c CurrentUser) FollowDiff() {
+
 }
