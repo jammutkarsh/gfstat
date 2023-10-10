@@ -71,7 +71,7 @@ func (g *GitHubAPI) GETUserData(username string) (err error) {
 	return nil
 }
 
-func (g GitHubAPI) GETFollowers(p *CurrentUser) error {
+func (g GitHubAPI) GETFollowers(c *CurrentUser) error {
 	response, err := http.Get(g.FollowersURL)
 	if err != nil {
 		return err
@@ -93,11 +93,12 @@ func (g GitHubAPI) GETFollowers(p *CurrentUser) error {
 	}
 
 	for _, v := range followersGitHubData {
-		p.Followers = append(p.Followers, MetaFollow{
+		c.Followers = append(c.Followers, MetaFollow{
 			Username: v.Username,
 			HTMLURL:  v.HTMLURL,
 		})
 	}
+	c.FollowersCount = len(c.Followers)
 
 	return nil
 }
@@ -129,6 +130,7 @@ func (g GitHubAPI) GETFollowing(c *CurrentUser) error {
 			HTMLURL:  v.HTMLURL,
 		})
 	}
+	c.FollowingCount = len(c.Following)
 
 	return nil
 }
