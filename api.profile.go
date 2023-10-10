@@ -1,7 +1,5 @@
 package main
 
-import "sort"
-
 type AccountType int
 
 const (
@@ -38,14 +36,6 @@ func (c *CurrentUser) setMetadata(username, htmlURL, accountType string) {
 
 // Mutuals gives the list of mutuals between followers and following.
 func (c CurrentUser) Mutuals() []MetaFollow {
-	// sort following and followers based on usernames
-	sort.Slice(c.Followers, func(i, j int) bool {
-		return c.Followers[i].Username < c.Followers[j].Username
-	})
-	sort.Slice(c.Following, func(i, j int) bool {
-		return c.Following[i].Username < c.Following[j].Username
-	})
-	// find mutuals
 	var mutuals []MetaFollow
 	for _, follower := range c.Followers {
 		for _, following := range c.Following {
@@ -55,4 +45,79 @@ func (c CurrentUser) Mutuals() []MetaFollow {
 		}
 	}
 	return mutuals
+}
+
+// followers - following
+// TC: O(n^2)
+// SC: O(1)
+func (c CurrentUser) FollowersYouDontFollow() []MetaFollow {
+	var iDontFollow []MetaFollow
+	for _, follower := range c.Followers {
+		var found bool
+		for _, following := range c.Following {
+			if follower.Username == following.Username {
+				found = true
+				break
+			}
+		}
+		if !found {
+			iDontFollow = append(iDontFollow, follower)
+		}
+	}
+	return iDontFollow
+}
+
+// TC: O(n)
+// SC: O(N)
+func (c CurrentUser) FollowersYouDontFollow2() []MetaFollow {
+	m := make(map[string]MetaFollow)
+	for _, following := range c.Following {
+		m[following.Username] = following
+	}
+
+	var theyDontFollow []MetaFollow
+	for _, follower := range c.Followers {
+		if _, ok := m[follower.Username]; !ok {
+			theyDontFollow = append(theyDontFollow, follower)
+		}
+	}
+	return theyDontFollow
+}
+
+// following - followers
+// TC: O(n^2)
+// SC: O(1)
+func (c CurrentUser) FollowingYouDontFollow() []MetaFollow {
+	var theyDontFollow []MetaFollow
+	for _, following := range c.Following {
+		var found bool
+		for _, follower := range c.Followers {
+			if following.Username == follower.Username {
+				found = true
+				break
+			}
+		}
+		if !found {
+			theyDontFollow = append(theyDontFollow, following)
+		}
+	}
+	return theyDontFollow
+}
+
+// TC: O(n)
+// SC: O(N)
+func (c CurrentUser) FollowingYouDontFollow2() []MetaFollow {
+	m := make(map[string]MetaFollow)
+	for _, followers := range c.Followers {
+		m[followers.Username] = followers
+	}
+
+	var iDontFollow []MetaFollow
+	for _, following := range c.Following {
+		if _, ok := m[following.Username]; !ok {
+			iDontFollow = append(iDontFollow, following)
+		}
+	}
+
+	return iDontFollow
 }

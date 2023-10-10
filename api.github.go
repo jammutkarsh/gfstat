@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"sort"
 	"time"
 )
 
@@ -98,6 +99,9 @@ func (g GitHubAPI) GETFollowers(c *CurrentUser) error {
 			HTMLURL:  v.HTMLURL,
 		})
 	}
+	sort.Slice(c.Followers, func(i, j int) bool {
+		return c.Followers[i].Username < c.Followers[j].Username
+	})
 	c.FollowersCount = len(c.Followers)
 
 	return nil
@@ -130,6 +134,9 @@ func (g GitHubAPI) GETFollowing(c *CurrentUser) error {
 			HTMLURL:  v.HTMLURL,
 		})
 	}
+	sort.Slice(c.Following, func(i, j int) bool {
+		return c.Following[i].Username < c.Following[j].Username
+	})
 	c.FollowingCount = len(c.Following)
 
 	return nil
