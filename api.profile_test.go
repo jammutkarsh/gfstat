@@ -1,0 +1,51 @@
+package main
+
+import (
+	"encoding/json"
+	"os"
+	"reflect"
+	"testing"
+)
+
+const testInput = "./testData/test.input.json"
+
+var input CurrentUser
+
+func init() {
+	testDataReader(&input, testInput)
+}
+
+type fields struct {
+	Username  string
+	Followers []MetaFollow
+	Following []MetaFollow
+}
+
+func testDataReader(v any, file string) {
+	bytes, err := os.ReadFile(file)
+	if err != nil {
+		panic(err)
+	}
+	if err := json.Unmarshal(bytes, v); err != nil {
+		panic(err)
+	}
+}
+
+func TestCurrentUser_Mutuals(t *testing.T) {
+	var want []MetaFollow
+	testDataReader(&want, "./testData/test.output.mutuals.json")
+	f := fields{
+		Username:  input.Username,
+		Followers: input.Followers,
+		Following: input.Following,
+	}
+	t.Run("Test 1", func(t *testing.T) {
+		c := CurrentUser{
+			Followers: f.Followers,
+			Following: f.Following,
+		}
+		if got := c.Mutuals(); !reflect.DeepEqual(got, want) {
+			t.Errorf("\nCurrentUser.Mutuals() = %v\nwant %v", got, want)
+		}
+	})
+}

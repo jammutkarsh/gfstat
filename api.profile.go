@@ -35,12 +35,21 @@ func (c *CurrentUser) setMetadata(username, htmlURL, accountType string) {
 }
 
 // Mutuals gives the list of mutuals between followers and following.
+// TC: O(nLogn)
+// SC: O(1)
 func (c CurrentUser) Mutuals() []MetaFollow {
 	var mutuals []MetaFollow
 	for _, follower := range c.Followers {
-		for _, following := range c.Following {
-			if follower.Username == following.Username {
+		low, high := 0, len(c.Following)-1
+		for low <= high {
+			mid := low + (high-low)/2
+			if follower.Username == c.Following[mid].Username {
 				mutuals = append(mutuals, follower)
+				break
+			} else if follower.Username < c.Following[mid].Username {
+				high = mid - 1
+			} else {
+				low = mid + 1
 			}
 		}
 	}
