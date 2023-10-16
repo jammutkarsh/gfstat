@@ -49,3 +49,41 @@ func TestCurrentUser_Mutuals(t *testing.T) {
 		}
 	})
 }
+
+func TestCurrentUser_FollowersYouDontFollow(t *testing.T) {
+	var want []MetaFollow
+	testDataReader(&want, "./testData/test.output.iDontFollow.json")
+	f := fields{
+		Username:  input.Username,
+		Followers: input.Followers,
+		Following: input.Following,
+	}
+	t.Run("Test 1", func(t *testing.T) {
+		c := CurrentUser{
+			Followers: f.Followers,
+			Following: f.Following,
+		}
+		if got := c.FollowersYouDontFollow(); !reflect.DeepEqual(got, want) {
+			t.Errorf("\nCurrentUser.FollowersYouDontFollow() = %v\nwant %v", got, want)
+		}
+	})
+}
+
+func TestCurrentUser_FollowingYouDontFollow(t *testing.T) {
+	var want []MetaFollow
+	testDataReader(&want, "./testData/test.output.theyDontFollow.json")
+	f := fields{
+		Username:  input.Username,
+		Followers: input.Followers,
+		Following: input.Following,
+	}
+	t.Run("Test 1", func(t *testing.T) {
+		c := CurrentUser{
+			Followers: f.Followers,
+			Following: f.Following,
+		}
+		if got := c.FollowingYouDontFollow(); !reflect.DeepEqual(got, want) {
+			t.Errorf("\nCurrentUser.FollowingYouDontFollow() = %v\nwant %v", got, want)
+		}
+	})
+}

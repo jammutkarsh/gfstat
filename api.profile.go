@@ -57,68 +57,32 @@ func (c CurrentUser) Mutuals() []MetaFollow {
 }
 
 // followers - following
-// TC: O(n^2)
-// SC: O(1)
+// TC: O(n)
+// SC: O(N)
 func (c CurrentUser) FollowersYouDontFollow() []MetaFollow {
+	m := make(map[string]MetaFollow)
+	for _, following := range c.Following {
+		m[following.Username] = following
+	}
+
 	var iDontFollow []MetaFollow
 	for _, follower := range c.Followers {
-		var found bool
-		for _, following := range c.Following {
-			if follower.Username == following.Username {
-				found = true
-				break
-			}
-		}
-		if !found {
+		if _, ok := m[follower.Username]; !ok {
 			iDontFollow = append(iDontFollow, follower)
 		}
 	}
 	return iDontFollow
 }
 
+// following - followers
 // TC: O(n)
 // SC: O(N)
-func (c CurrentUser) FollowersYouDontFollow2() []MetaFollow {
+func (c CurrentUser) FollowingYouDontFollow() []MetaFollow {
 	m := make(map[string]MetaFollow)
-	for _, following := range c.Following {
-		m[following.Username] = following
-	}
-
-	var theyDontFollow []MetaFollow
 	for _, follower := range c.Followers {
 		if _, ok := m[follower.Username]; !ok {
-			theyDontFollow = append(theyDontFollow, follower)
+			m[follower.Username] = follower
 		}
-	}
-	return theyDontFollow
-}
-
-// following - followers
-// TC: O(n^2)
-// SC: O(1)
-func (c CurrentUser) FollowingYouDontFollow() []MetaFollow {
-	var theyDontFollow []MetaFollow
-	for _, following := range c.Following {
-		var found bool
-		for _, follower := range c.Followers {
-			if following.Username == follower.Username {
-				found = true
-				break
-			}
-		}
-		if !found {
-			theyDontFollow = append(theyDontFollow, following)
-		}
-	}
-	return theyDontFollow
-}
-
-// TC: O(n)
-// SC: O(N)
-func (c CurrentUser) FollowingYouDontFollow2() []MetaFollow {
-	m := make(map[string]MetaFollow)
-	for _, followers := range c.Followers {
-		m[followers.Username] = followers
 	}
 
 	var iDontFollow []MetaFollow
