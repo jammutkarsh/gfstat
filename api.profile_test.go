@@ -32,6 +32,7 @@ func testDataReader(v any, file string) {
 }
 
 func TestCurrentUser_Mutuals(t *testing.T) {
+	t.Parallel()
 	var want []MetaFollow
 	testDataReader(&want, "./testData/test.output.mutuals.json")
 	f := fields{
@@ -51,6 +52,7 @@ func TestCurrentUser_Mutuals(t *testing.T) {
 }
 
 func TestCurrentUser_FollowersYouDontFollow(t *testing.T) {
+	t.Parallel()
 	var want []MetaFollow
 	testDataReader(&want, "./testData/test.output.iDontFollow.json")
 	f := fields{
@@ -70,6 +72,7 @@ func TestCurrentUser_FollowersYouDontFollow(t *testing.T) {
 }
 
 func TestCurrentUser_FollowingYouDontFollow(t *testing.T) {
+	t.Parallel()
 	var want []MetaFollow
 	testDataReader(&want, "./testData/test.output.theyDontFollow.json")
 	f := fields{
