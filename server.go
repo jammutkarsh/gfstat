@@ -36,8 +36,8 @@ type IndexPageData struct {
 type BasicPageData struct {
 	User   *github.User
 	Mutuals []MetaFollow
-	iDontFollow []MetaFollow
-	theyDontFollow []MetaFollow
+	IDontFollow []MetaFollow
+	TheyDontFollow []MetaFollow
 }
 
 type Access struct {
@@ -79,11 +79,6 @@ func Success(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(resp.Body).Decode(&access); err != nil {
 		log.Println("JSON-Decode-Problem: ", err)
-		return
-	}
-
-	if access.Scope != "user:email" {
-		log.Println("Wrong token scope: ", access.Scope)
 		return
 	}
 
