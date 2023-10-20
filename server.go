@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
@@ -19,18 +22,22 @@ var (
 	clientId     = os.Getenv("GH_BASIC_CLIENT_ID") // like public key
 	clientSecret = os.Getenv("GH_BASIC_SECRET_ID") // like private key
 	// Frontend
-	// basicPage     = template.Must(template.New("basic.tmpl").ParseFiles("views/basic.tmpl"))
 	indexPageData = IndexPageData{clientId}
 	// Context
 	background = context.Background()
 )
 
+// To get Secret ID
 type IndexPageData struct {
 	ClientId string
 }
 
+// Using Access Token and GitHub SDK can facilitate the use of GitHub API directly to structs.
 type BasicPageData struct {
 	User   *github.User
+	Mutuals []MetaFollow
+	iDontFollow []MetaFollow
+	theyDontFollow []MetaFollow
 }
 
 type Access struct {
@@ -41,7 +48,7 @@ type Access struct {
 func serve() {
 	fmt.Println("http://127.0.0.1:3639")
 	http.HandleFunc("/", Index)
-	// http.HandleFunc("/success", Success)
+	http.HandleFunc("/success", Success)
 	if err:=http.ListenAndServe(":"+port, nil); err!=nil {
 		panic(err)
 	}
@@ -54,60 +61,47 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// func Success(w http.ResponseWriter, r *http.Request) {
-// 	accessToken := LoginWithGitHub(r)
-// 	client := getGitHubClient(accessToken)
+func Success(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	values := url.Values{"client_id": {clientId}, "client_secret": {clientSecret}, "code": {code}, "accept": {"json"}}
 
-// 	user, _, err := client.Users.Get(background, "")
-// 	if err != nil {
-//         http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
+	req, _ := http.NewRequest("POST", "https://github.com/login/oauth/access_token", strings.NewReader(values.Encode()))
+	req.Header.Set("Accept", "application/json")
+	resp, err := http.DefaultClient.Do(req)
 
-// 	basicPageData := BasicPageData{user}
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	defer resp.Body.Close()
 
-// 	render := template.Must(template.New("basic.html").ParseFiles("views/basic.html"))
-// 	if err := render.Execute(w, basicPageData); err != nil {
-//         http.Error(w, err.Error(), http.StatusInternalServerError)
-// 	}
-// }
+	var access Access
 
-// func LoginWithGitHub(w http.ResponseWriter, r *http.Request) (accessToken string) {
-// 	code := r.URL.Query().Get("code")
-// 	values := url.Values{"client_id": {clientId}, "client_secret": {clientSecret}, "code": {code}, "accept": {"json"}}
+	if err := json.NewDecoder(resp.Body).Decode(&access); err != nil {
+		log.Println("JSON-Decode-Problem: ", err)
+		return
+	}
 
-// 	req := fasthttp.AcquireRequest()
-// 	resp := fasthttp.AcquireResponse()
-// 	defer fasthttp.ReleaseRequest(req)
-// 	defer fasthttp.ReleaseResponse(resp)
+	if access.Scope != "user:email" {
+		log.Println("Wrong token scope: ", access.Scope)
+		return
+	}
 
-// 	req.SetRequestURI("https://github.com/login/oauth/access_token")
-// 	req.SetBodyString(values.Encode())
-// 	req.Header.Set("Accept", "application/json")
-// 	req.Header.SetMethod("POST")
+	client := getGitHubClient(access.AccessToken)
 
-// 	if err := fasthttp.Do(req, resp); err != nil {
-// 		ctx.Error(err.Error(), fasthttp.StatusPreconditionFailed)
-// 		return
-// 	}
-// 	if resp.StatusCode() != fasthttp.StatusOK {
-// 		ctx.Error(fmt.Sprintf("Retrieving access token failed: %d", resp.StatusCode()), resp.StatusCode())
-// 		return
-// 	}
-// 	var access Access
+	user, _, err := client.Users.Get(background, "")
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-// 	if err := json.Unmarshal(resp.Body(), &access); err != nil {
-// 		ctx.Error(fmt.Sprintf("JSON-Decode-Problem: %s", err), fasthttp.StatusInternalServerError)
-// 		return
-// 	}
+	basicPageData := BasicPageData{User: user}
 
-// 	if access.Scope != "user:email" {
-// 		ctx.Error(fmt.Sprintf("Wrong token scope: %s", access.Scope), fasthttp.StatusPreconditionFailed)
-// 		return
-// 	}
-
-// 	return access.AccessToken
-// }
+	render := template.Must(template.New("basic.tmpl").ParseFiles("views/basic.tmpl"))
+	if err := render.Execute(w, basicPageData); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
 
 // Authenticates GitHub Client with provided OAuth access token
 func getGitHubClient(accessToken string) *github.Client {
