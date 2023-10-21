@@ -1,150 +1,101 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"errors"
-	"io"
+	"fmt"
+	"html/template"
+	"log"
 	"net/http"
-	"sort"
-	"time"
+	"net/url"
+	"os"
+	"strings"
+
+	"github.com/google/go-github/github"
+	"golang.org/x/oauth2"
 )
 
-// GitHubAPI is the response from the GitHub API
-type GitHubAPI struct {
-	Username          string    `json:"login"`
-	ID                int       `json:"id"`
-	NodeID            string    `json:"node_id"`
-	AvatarURL         string    `json:"avatar_url"`
-	GravatarID        string    `json:"gravatar_id"`
-	URL               string    `json:"url"`
-	HTMLURL           string    `json:"html_url"`
-	FollowersURL      string    `json:"followers_url"`
-	FollowingURL      string    `json:"following_url"`
-	GistsURL          string    `json:"gists_url"`
-	StarredURL        string    `json:"starred_url"`
-	SubscriptionsURL  string    `json:"subscriptions_url"`
-	OrganizationsURL  string    `json:"organizations_url"`
-	ReposURL          string    `json:"repos_url"`
-	EventsURL         string    `json:"events_url"`
-	ReceivedEventsURL string    `json:"received_events_url"`
-	Type              string    `json:"type"`
-	SiteAdmin         bool      `json:"site_admin"`
-	Name              string    `json:"name"`
-	Company           string    `json:"company"`
-	Blog              string    `json:"blog"`
-	Location          string    `json:"location"`
-	Email             string    `json:"email"`
-	Hireable          bool      `json:"hireable"`
-	Bio               string    `json:"bio"`
-	TwitterUsername   string    `json:"twitter_username"`
-	PublicRepos       int       `json:"public_repos"`
-	PublicGists       int       `json:"public_gists"`
-	Followers         int       `json:"followers"`
-	Following         int       `json:"following"`
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
+const port = "3639"
+
+// Using Access Token and GitHub SDK can facilitate the use of GitHub API directly to structs.
+type BasicPageData struct {
+	User           *github.User
+	Mutuals        []MetaFollow
+	IDontFollow    []MetaFollow
+	TheyDontFollow []MetaFollow
 }
 
-// GETUserData retrieves the user data from the GitHub API
-func (g *GitHubAPI) GETUserData(username string) (err error) {
-	response, err := http.Get(requestURL + username)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != 200 {
-		return errors.New("Error: User Not Found")
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-
-	if err := json.Unmarshal(body, &g); err != nil {
-		return err
-	}
-
-	// Remove the trailing "{/other_user}" from the URL
-	g.FollowingURL = g.FollowingURL[:len(g.FollowingURL)-len("{/other_user}")]
-
-	return nil
+type Access struct {
+	AccessToken string `json:"access_token"`
+	Scope       string // Scope lets us know what rights we have to the user's account
 }
 
-func (g GitHubAPI) GETFollowers(c *CurrentUser) error {
-	response, err := http.Get(g.FollowersURL)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
+var (
+	// GitHub OAuth Config
+	githubPublicID     = os.Getenv("GH_BASIC_CLIENT_ID") // like public key
+	githubServerSecret = os.Getenv("GH_BASIC_SECRET_ID") // like private key
+	// Frontend
+	indexPageData = githubPublicID
+	// Context
+	background = context.Background()
+)
 
-	if response.StatusCode != 200 {
-		return errors.New("Error: Couldn't find followers")
+func serveWebApp() {
+	fmt.Println("http://127.0.0.1:3639")
+	http.HandleFunc("/", Index)
+	http.HandleFunc("/success", Success)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		panic(err)
 	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-
-	var followersGitHubData []GitHubAPI
-	if err := json.Unmarshal(body, &followersGitHubData); err != nil {
-		return err
-	}
-
-	for _, v := range followersGitHubData {
-		c.Followers = append(c.Followers, MetaFollow{
-			Username: v.Username,
-			HTMLURL:  v.HTMLURL,
-		})
-	}
-	sort.Slice(c.Followers, func(i, j int) bool {
-		return c.Followers[i].Username < c.Followers[j].Username
-	})
-	c.FollowersCount = len(c.Followers)
-
-	return nil
 }
 
-func (g GitHubAPI) GETFollowing(c *CurrentUser) error {
-	response, err := http.Get(g.FollowingURL)
-	if err != nil {
-		return err
+// The Index function renders the index page template and sends it as a response to the client.
+func Index(w http.ResponseWriter, r *http.Request) {
+	indexPage := template.Must(template.New("index.tmpl").ParseFiles("views/index.tmpl"))
+	if err := indexPage.Execute(w, indexPageData); err != nil {
+		log.Println(err)
 	}
-	defer response.Body.Close()
-
-	if response.StatusCode != 200 {
-		return errors.New("Error: Couldn't find following")
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-
-	var followingGitHubData []GitHubAPI
-	if err := json.Unmarshal(body, &followingGitHubData); err != nil {
-		return err
-	}
-
-	for _, v := range followingGitHubData {
-		c.Following = append(c.Following, MetaFollow{
-			Username: v.Username,
-			HTMLURL:  v.HTMLURL,
-		})
-	}
-	sort.Slice(c.Following, func(i, j int) bool {
-		return c.Following[i].Username < c.Following[j].Username
-	})
-	c.FollowingCount = len(c.Following)
-
-	return nil
 }
 
-// GetUsername returns the username.
-// It is specifically tied to this struct because GitHubAPI is the first data structure
-// which records all the data from API call.
-func (g *GitHubAPI) GetUsername() (username string) {
-	return g.Username
+func GetAccessToken(w http.ResponseWriter, r *http.Request) string {
+	code := r.URL.Query().Get("code")
+	values := url.Values{"client_id": {githubPublicID}, "client_secret": {githubServerSecret}, "code": {code}, "accept": {"json"}}
+
+	req, _ := http.NewRequest("POST", "https://github.com/login/oauth/access_token", strings.NewReader(values.Encode()))
+	req.Header.Set("Accept", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		log.Print(err)
+		return ""
+	}
+	defer resp.Body.Close()
+
+	var access Access
+
+	if err := json.NewDecoder(resp.Body).Decode(&access); err != nil {
+		log.Println("JSON-Decode-Problem: ", err)
+		return ""
+	}
+
+	return access.AccessToken
+}
+
+// Authenticates GitHub Client with provided OAuth access token
+func getGitHubClient(accessToken string) *github.Client {
+	ctx := background
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: accessToken},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	return github.NewClient(tc)
+}
+
+func getGitHubUser(client *github.Client) *github.User {
+	user, _, err := client.Users.Get(background, "")
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return user
 }
