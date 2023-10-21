@@ -7,23 +7,28 @@ import (
 )
 
 func GETFollowers(c *github.Client, u github.User) (followers []MetaFollow, err error) {
-	pageCount := 1
-	opts := &github.ListOptions{Page: pageCount, PerPage: 100}
-	follow, res, err := c.Users.ListFollowers(internalGitHubCtx, *u.Name, opts)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
 
-	if res.StatusCode != 200 {
-		return nil, err
-	}
+	for pageCount := 1; pageCount <= numberOfPages(*u.Followers); pageCount++ {
+		opts := &github.ListOptions{Page: pageCount, PerPage: 100}
 
-	for _, v := range follow {
-		followers = append(followers, MetaFollow{
-			Username: *v.Login,
-			HTMLURL:  *v.HTMLURL,
-		})
+		follow, res, err := c.Users.ListFollowers(internalGitHubCtx, *u.Login, opts)
+		if err != nil {
+			return nil, err
+		}
+
+		defer res.Body.Close()
+
+		if res.StatusCode != 200 {
+			return nil, err
+		}
+
+		for _, v := range follow {
+			followers = append(followers, MetaFollow{
+				Username: *v.Login,
+				HTMLURL:  *v.HTMLURL,
+			})
+		}
+
 	}
 
 	sort.Slice(followers, func(i, j int) bool {
@@ -34,23 +39,27 @@ func GETFollowers(c *github.Client, u github.User) (followers []MetaFollow, err 
 }
 
 func GETFollowing(c *github.Client, u github.User) (followers []MetaFollow, err error) {
-	pageCount := 1
-	opts := &github.ListOptions{Page: pageCount, PerPage: 100}
-	follow, res, err := c.Users.ListFollowing(internalGitHubCtx, *u.Name, opts)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
+	for pageCount := 1; pageCount <= numberOfPages(*u.Following); pageCount++ {
+		opts := &github.ListOptions{Page: pageCount, PerPage: 100}
 
-	if res.StatusCode != 200 {
-		return nil, err
-	}
+		follow, res, err := c.Users.ListFollowing(internalGitHubCtx, *u.Login, opts)
+		if err != nil {
+			return nil, err
+		}
 
-	for _, v := range follow {
-		followers = append(followers, MetaFollow{
-			Username: *v.Login,
-			HTMLURL:  *v.HTMLURL,
-		})
+		defer res.Body.Close()
+
+		if res.StatusCode != 200 {
+			return nil, err
+		}
+
+		for _, v := range follow {
+			followers = append(followers, MetaFollow{
+				Username: *v.Login,
+				HTMLURL:  *v.HTMLURL,
+			})
+		}
+
 	}
 
 	sort.Slice(followers, func(i, j int) bool {
@@ -59,4 +68,11 @@ func GETFollowing(c *github.Client, u github.User) (followers []MetaFollow, err 
 
 	return followers, nil
 
+}
+
+func numberOfPages(followCount int) int {
+	if followCount < 100 {
+		return 1
+	}
+	return (followCount / 100) + 1
 }

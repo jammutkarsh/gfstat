@@ -27,7 +27,6 @@ var (
 	internalGitHubCtx = context.Background()
 )
 
-
 // getAccessToken returns the access token from the GitHub OAuth2.0 API
 func getAccessToken(w http.ResponseWriter, r *http.Request) (creds access) {
 	sessionToken := r.URL.Query().Get("code")

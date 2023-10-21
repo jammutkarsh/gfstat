@@ -11,7 +11,7 @@ import (
 
 const port = "3639"
 
-var  indexPageData = IndexPageData{githubPublicID}
+var indexPageData = IndexPageData{githubPublicID}
 
 // Using Access Token and GitHub SDK can facilitate the use of GitHub API directly to structs.
 type BasicPageData struct {
@@ -51,12 +51,22 @@ func Result(w http.ResponseWriter, r *http.Request) {
 	// But Using HTMX, I can display the result on the same page.
 	// Need to figure out what happens when I make the make the callback to the same page.
 	accessKeys := getAccessToken(w, r)
-
 	client := getGitHubClient(&accessKeys.AccessToken)
-
 	user := getGitHubUser(client)
 
-	basicPageData := BasicPageData{*user, nil, nil, nil}
+	// Get the followers of the user
+	followers, err := GETFollowers(client, *user)
+	if err != nil {
+		log.Println(err)
+	}
+
+	// Get the following of the user
+	following, err := GETFollowing(client, *user)
+	if err != nil {
+		log.Println(err)
+	}
+
+	basicPageData := BasicPageData{*user, followers, following, nil}
 
 	render := template.Must(template.New("basic.tmpl").ParseFiles("views/basic.tmpl"))
 	if err := render.Execute(w, basicPageData); err != nil {
