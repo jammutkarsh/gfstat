@@ -7,9 +7,10 @@ import (
 
 
 
-func Success(w http.ResponseWriter, r *http.Request) {
+func Success(w http.ResponseWriter, b *BasicPageData) {
 
-	basicPageData := BasicPageData{User: user}
+	// I just need to populate this struct with the data from the GitHub API
+	basicPageData := BasicPageData{}
 
 	render := template.Must(template.New("basic.tmpl").ParseFiles("views/basic.tmpl"))
 	if err := render.Execute(w, basicPageData); err != nil {

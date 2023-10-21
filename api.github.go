@@ -19,13 +19,19 @@ const port = "3639"
 
 // Using Access Token and GitHub SDK can facilitate the use of GitHub API directly to structs.
 type BasicPageData struct {
-	User           *github.User
+	User           github.User
 	Mutuals        []MetaFollow
 	IDontFollow    []MetaFollow
 	TheyDontFollow []MetaFollow
 }
 
-type Access struct {
+// IndexPageData is the data for the index page template
+type IndexPageData struct {
+	ClientID string
+}
+
+// access is the response from the GitHub OAuth2.0 API
+type access struct {
 	AccessToken string `json:"access_token"`
 	Scope       string // Scope lets us know what rights we have to the user's account
 }
@@ -35,7 +41,7 @@ var (
 	githubPublicID     = os.Getenv("GH_BASIC_CLIENT_ID") // like public key
 	githubServerSecret = os.Getenv("GH_BASIC_SECRET_ID") // like private key
 	// Frontend
-	indexPageData = githubPublicID
+	indexPageData = IndexPageData{githubPublicID}
 	// Context
 	background = context.Background()
 )
@@ -43,7 +49,12 @@ var (
 func serveWebApp() {
 	fmt.Println("http://127.0.0.1:3639")
 	http.HandleFunc("/", Index)
-	http.HandleFunc("/success", Success)
+	http.HandleFunc("/success", GetAccessToken)
+	http.HandleFunc("/result", func(w http.ResponseWriter, r *http.Request) {
+		b := BasicPageData{}
+		Success(w, &b)
+	})
+	http.NotFoundHandler()
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		panic(err)
 	}
@@ -57,7 +68,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetAccessToken(w http.ResponseWriter, r *http.Request) string {
+func GetAccessToken(w http.ResponseWriter, r *http.Request)  {
 	code := r.URL.Query().Get("code")
 	values := url.Values{"client_id": {githubPublicID}, "client_secret": {githubServerSecret}, "code": {code}, "accept": {"json"}}
 
@@ -66,26 +77,30 @@ func GetAccessToken(w http.ResponseWriter, r *http.Request) string {
 	resp, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		log.Print(err)
-		return ""
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	defer resp.Body.Close()
 
-	var access Access
+	var access access
 
 	if err := json.NewDecoder(resp.Body).Decode(&access); err != nil {
-		log.Println("JSON-Decode-Problem: ", err)
-		return ""
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+	// perform some action with the access token
 
-	return access.AccessToken
+	// possibly redirecty to a new page /result and 
+	// render the result page template and send it as a response to the client.
+	http.Redirect(w, r, "/result", http.StatusSeeOther)
+
 }
 
 // Authenticates GitHub Client with provided OAuth access token
-func getGitHubClient(accessToken string) *github.Client {
+func getGitHubClient(accessToken *string) *github.Client {
 	ctx := background
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: accessToken},
+		&oauth2.Token{AccessToken: *accessToken},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	return github.NewClient(tc)
