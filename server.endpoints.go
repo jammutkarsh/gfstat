@@ -40,8 +40,9 @@ func serveWebApp() {
 func Index(w http.ResponseWriter, r *http.Request) {
 	indexPage := template.Must(template.New("index.tmpl").ParseFiles("views/index.tmpl"))
 	if err := indexPage.Execute(w, indexPageData); err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	log.Println("Index Page Served")
 }
 
 // The Result function renders the result page template and sends it as a response to the client.
@@ -57,19 +58,24 @@ func Result(w http.ResponseWriter, r *http.Request) {
 	// Get the followers of the user
 	followers, err := GETFollowers(client, *user)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	// Get the following of the user
 	following, err := GETFollowing(client, *user)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	basicPageData := BasicPageData{*user, followers, following, nil}
+	// Get the mutuals of the user
+	mutuals := Mutuals(followers, following)
+	iDontFollow := FollowersYouDontFollow(followers, following)
+	theyDontFollow := FollowingYouDontFollow(followers, following)
+	basicPageData := BasicPageData{*user, mutuals, iDontFollow, theyDontFollow}
 
 	render := template.Must(template.New("basic.tmpl").ParseFiles("views/basic.tmpl"))
 	if err := render.Execute(w, basicPageData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	log.Println("Result Page Served")
 }

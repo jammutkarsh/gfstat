@@ -2,23 +2,28 @@
 <meta charset="utf-8">
 <html>
 
-			<title>Go Web App</title>
+	<title>Go Web App</title>
 	</head>
 
 	<body>
-		<p>Hello, {{.User.Login}}</p>
+		<h1>Hello, {{.User.Login}}</h1>
 		<p>Here are your Mutuals</p>
 		<ul>
 			{{range .Mutuals}}
-			<li><a>{{.Mutuals.Username}}</a href="{{.Mutuals.HTMLURL}}"></li>
+			<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
 			{{end}}
 		</ul>
-		<p>Here are your Followers you dont follow</p>
+		<p>Here are your Followers that don't follow you</p>
+		<ul>
+			{{range .TheyDontFollow}}
+			<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
+			{{end}}
+		</ul>
+		<p>Here are your Following you don't follow</p>
 		<ul>
 			{{range .IDontFollow}}
-			<li><a>{{.IDontFollow.Username}}</a href="{{.IDontFollow.HTMLURL}}"></li>
+			<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
 			{{end}}
-		</ul>
 	</body>
 
 </html>
