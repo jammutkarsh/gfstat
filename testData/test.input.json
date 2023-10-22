@@ -1,7 +1,5 @@
 {
   "username": "soumyyyaaa",
-  "type": "User",
-  "html_url": "https://github.com/soumyyyaaa",
   "followers": [
     {
       "username": "JammUtkarsh",
@@ -52,7 +50,6 @@
       "html_url": "https://github.com/tanishjain158"
     }
   ],
-  "FollowersCount": 12,
   "following": [
     {
       "username": "JammUtkarsh",
@@ -102,6 +99,5 @@
       "username": "sushantsharma08",
       "html_url": "https://github.com/sushantsharma08"
     }
-  ],
-  "FollowingCount": 12
+  ]
 }
