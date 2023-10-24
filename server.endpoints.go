@@ -13,6 +13,13 @@ const port = "3639"
 
 var indexPageData = IndexPageData{githubPublicID}
 
+func init() {
+	// check for env vars
+	if githubPublicID == "" || githubServerSecret == "" {
+		panic("GitHub OAuth2.0 Client ID and Secret ID not set")
+	}
+}
+
 // Using Access Token and GitHub SDK can facilitate the use of GitHub API directly to structs.
 type BasicPageData struct {
 	User           github.User
