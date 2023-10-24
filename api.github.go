@@ -3,7 +3,7 @@ package main
 import (
 	"sort"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v56/github"
 )
 
 func GETFollowers(c *github.Client, u github.User) (followers []MetaFollow, err error) {
