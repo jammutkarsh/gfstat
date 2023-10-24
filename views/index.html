@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.classless.min.css" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+		<title>Go Web App</title>
+	</head>
+
+
+	<body class="container">
+		<nav>
+			<ul>
+				<li><strong><a href="/">GfStat</a></strong></li>
+			  </ul>
+			  <ul>
+				<li><a href="https://github.com/JammUtkarsh/gfstat">★ me on GitHub</a></li>
+			  </ul>
+		</nav>
+		<header>
+			<hgroup>
+				<h1>Hello there,</h1>
+				<h2>Let's get started with GitHub Follow Statistics</h2>
+			</hgroup>
+			<hgroup>
+				<p>gfStat is a simple web app that lets you see your GitHub follow statistics. It shows you:
+				<ul>
+					<li><b>Mutual</b> followers/following!</li>
+					<li><b>Followers</b> who don't follow you!</li>
+					<li><b>Following</b> that you don't follow!</li>
+				</ul>
+				</p>
+				<h4>Ready?</h4>
+			</hgroup>
+				<a href="https://github.com/login/oauth/authorize?scope=user:follow&read:user&client_id={{.ClientID}}"
+				role="button" >Login With GitHub</a>
+		</header>
+		<footer>
+			<hr>
+			Bult with <a href="https://golang.org/">Go</a>, <a href="https://picocss.com/">Pico.css</a> and <a
+				href="https://htmx.org/">HTMX</a>
+			<br>
+			<i>By <a href="https://utkarshchourasia.in/">Utkarsh Chourasia</a></i>
+		</footer>
+	</body>
+
+</html>

@@ -45,7 +45,7 @@ func serveWebApp() {
 
 // The Index function renders the index page template and sends it as a response to the client.
 func Index(w http.ResponseWriter, r *http.Request) {
-	indexPage := template.Must(template.New("index.tmpl").ParseFiles("views/index.tmpl"))
+	indexPage := template.Must(template.New("index.html").ParseFiles("views/index.html"))
 	if err := indexPage.Execute(w, indexPageData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -58,6 +58,10 @@ func Result(w http.ResponseWriter, r *http.Request) {
 	// using the token, I need to display the result.
 	// But Using HTMX, I can display the result on the same page.
 	// Need to figure out what happens when I make the make the callback to the same page.
+	if !r.URL.Query().Has("code")  {
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
 	accessKeys := getAccessToken(w, r)
 	client := getGitHubClient(&accessKeys.AccessToken)
 	user := getGitHubUser(client)
@@ -66,12 +70,14 @@ func Result(w http.ResponseWriter, r *http.Request) {
 	followers, err := GETFollowers(client, *user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	// Get the following of the user
 	following, err := GETFollowing(client, *user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	// Get the mutuals of the user
@@ -79,10 +85,10 @@ func Result(w http.ResponseWriter, r *http.Request) {
 	iDontFollow := FollowersYouDontFollow(followers, following)
 	theyDontFollow := FollowingYouDontFollow(followers, following)
 	basicPageData := BasicPageData{*user, mutuals, iDontFollow, theyDontFollow}
-
-	render := template.Must(template.New("basic.tmpl").ParseFiles("views/basic.tmpl"))
+	render := template.Must(template.New("basic.html").ParseFiles("views/basic.html"))
 	if err := render.Execute(w, basicPageData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	log.Println("Result Page Served")
 }
