@@ -1,6 +1,6 @@
 module github.com/JammUtkarsh/gdiff
 
-go 1.21.1
+go 1.19
 
 require (
 	github.com/google/go-github/v56 v56.0.0

@@ -7,58 +7,64 @@
 		<script src="https://unpkg.com/htmx.org@1.9.6"></script>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.classless.min.css" />
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-		<title>Go Web App</title>
+		<title>gfStat</title>
 	</head>
 
 	<body class="container">
 		<nav>
 			<ul>
-				<li><strong><a href="/">GfStat</a></strong></li>
+				<li><kbd><a href="/">GitHub Follow Statistics</a></kbd></li>
 			</ul>
 			<ul>
-				<li><a href="https://github.com/JammUtkarsh/gfstat">★ me on GitHub</a></li>
-				<li><a href="https://github.com/login/oauth/authorize?scope=user:follow&read:user&client_id=3eda1f5b208fa4586873"
-						role="button" class="outline">Again?</a></li>
+				<li><a href="https://github.com/JammUtkarsh/gfstat" target="_blank">★ me on GitHub</a></li>
 			</ul>
-		</nav>
-		<header>
-			<h1>Hello, {{.User.Login}}</h1>
-			<details open>
-				<summary role="button" class="secondary">Here are your Mutuals</summary>
-				<ul>
-					{{range .Mutuals}}
-					<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
-					{{end}}
-				</ul>
-			</details>
-			<details>
-				<summary role="button" class="secondary">Here are your Followers that don't follow you</summary>
-				<ul>
-					{{range .TheyDontFollow}}
-					<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
-					{{end}}
-				</ul>
-			</details>
-			<details>
-				<summary role="button" class="secondary">Here are your Following you don't follow</summary>
-				<ul>
-					{{range .IDontFollow}}
-					<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
-					{{end}}
-				</ul>
-			</details>
-		</header>
-		<main>
-			<a href="https://github.com/login/oauth/authorize?scope=user:follow&read:user&client_id=3eda1f5b208fa4586873"
-				role="button" class="outline">Again?</a>
-		</main>
-		<footer>
-			<hr>
-			Bult with <a href="https://golang.org/">Go</a>, <a href="https://picocss.com/">Pico.css</a> and <a
-				href="https://htmx.org/">HTMX</a>
-			<br>
-			<i>By <a href="https://utkarshchourasia.in/">Utkarsh Chourasia</a></i>
-		</footer>
+			<header>
+				<h1>Hello, {{.User.Login}}</h1>
+				<details open>
+					<summary role="button" class="secondary">Here are your Mutuals</summary>
+					<ul>
+						{{range .Mutuals}}
+						<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
+						{{end}}
+					</ul>
+				</details>
+				<details>
+					<summary role="button" class="secondary">Here are your Followers that don't follow you</summary>
+					<ul>
+						{{range .TheyDontFollow}}
+						<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
+						{{end}}
+					</ul>
+				</details>
+				<details>
+					<summary role="button" class="secondary">Here are your Following you don't follow</summary>
+					<ul>
+						{{range .IDontFollow}}
+						<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
+						{{end}}
+					</ul>
+				</details>
+			</header>
+			<main>
+				<h4>Did you followers/followers change?</h4>
+				<p>
+					Want to Check Again?
+				</p>
+				<a href="https://github.com/login/oauth/authorize?scope=user:follow&read:user&client_id=3eda1f5b208fa4586873"
+					role="button" class="outline">YES!!!!!!</a>
+			</main>
+			<footer>
+				<p><i>PS: This app is still under development. There might be a few breaking changes once in a while.
+						<br>Feel free to create an issue <a href="https://github.com/JammUtkarsh/gfstat/issues">here</a>
+						for
+						any feature or bug reports!
+					</i></p>
+				<hr>
+				Built with <a href="https://golang.org/">Go</a>, <a href="https://picocss.com/">Pico.css</a> and <a
+					href="https://htmx.org/">HTMX</a>
+				<br>
+				<i>By <a href="https://utkarshchourasia.in/">Utkarsh Chourasia</a></i>
+			</footer>
 	</body>
 
 </html>
