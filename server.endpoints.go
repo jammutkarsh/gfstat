@@ -22,6 +22,7 @@ func init() {
 
 // Using Access Token and GitHub SDK can facilitate the use of GitHub API directly to structs.
 type BasicPageData struct {
+	ClientID string
 	User           github.User
 	Mutuals        []MetaFollow
 	IDontFollow    []MetaFollow
@@ -37,7 +38,6 @@ func serveWebApp() {
 	fmt.Println("http://127.0.0.1:3639")
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/result", Result)
-	http.NotFoundHandler()
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		panic(err)
 	}
@@ -63,6 +63,14 @@ func Result(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	accessKeys := getAccessToken(w, r)
+	// bug: when user tries to refresh the page which has the same session token.
+	// But the session token can only be used once.
+	// The github API should return an error if the token is used more than once but it return 200 for every request.
+	// So in the 2nd refresh, the access token is empty and the user is redirected to the login page.
+	if accessKeys.AccessToken == "" {
+		http.Redirect(w, r, "https://github.com/login/oauth/authorize?scope=user:follow&read:user&client_id="+githubPublicID, http.StatusTemporaryRedirect)
+		return
+	}
 	client := getGitHubClient(&accessKeys.AccessToken)
 	user := getGitHubUser(client)
 
@@ -84,7 +92,7 @@ func Result(w http.ResponseWriter, r *http.Request) {
 	mutuals := Mutuals(followers, following)
 	iDontFollow := FollowersYouDontFollow(followers, following)
 	theyDontFollow := FollowingYouDontFollow(followers, following)
-	basicPageData := BasicPageData{*user, mutuals, iDontFollow, theyDontFollow}
+	basicPageData := BasicPageData{githubPublicID, *user, mutuals, iDontFollow, theyDontFollow}
 	render := template.Must(template.New("basic.html").ParseFiles("views/basic.html"))
 	if err := render.Execute(w, basicPageData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

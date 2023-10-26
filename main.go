@@ -1,6 +1,5 @@
 package main
 
-const requestURL = "https://api.github.com/users/"
 
 func main() {
 	// var username string

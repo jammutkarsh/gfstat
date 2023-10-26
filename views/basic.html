@@ -18,6 +18,7 @@
 			<ul>
 				<li><a href="https://github.com/JammUtkarsh/gfstat" target="_blank">★ me on GitHub</a></li>
 			</ul>
+		</nav>
 			<header>
 				<h1>Hello, {{.User.Login}}</h1>
 				<details open>
@@ -50,7 +51,7 @@
 				<p>
 					Want to Check Again?
 				</p>
-				<a href="https://github.com/login/oauth/authorize?scope=user:follow&read:user&client_id=3eda1f5b208fa4586873"
+				<a href="https://github.com/login/oauth/authorize?scope=user:follow&read:user&client_id={{.ClientID}}"
 					role="button" class="outline">YES!!!!!!</a>
 			</main>
 			<footer>
