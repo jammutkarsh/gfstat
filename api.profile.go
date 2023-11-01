@@ -17,6 +17,9 @@ type MetaFollow struct {
 // TC: O(nLogn)
 // SC: O(1)
 func Mutuals(followers, following []MetaFollow) []MetaFollow {
+	if len(followers) == 0 || len(following) == 0 {
+		return nil
+	}
 	var mutuals []MetaFollow
 	for _, follower := range followers {
 		low, high := 0, len(following)-1
@@ -38,7 +41,7 @@ func Mutuals(followers, following []MetaFollow) []MetaFollow {
 // followers - following
 // TC: O(n)
 // SC: O(N)
-func FollowersYouDontFollow(followers, following []MetaFollow) []MetaFollow {
+func IDontFollow(followers, following []MetaFollow) []MetaFollow {
 	m := make(map[string]MetaFollow)
 	for _, following := range following {
 		m[following.Username] = following
@@ -56,7 +59,7 @@ func FollowersYouDontFollow(followers, following []MetaFollow) []MetaFollow {
 // following - followers
 // TC: O(n)
 // SC: O(N)
-func FollowingYouDontFollow(followers, following []MetaFollow) []MetaFollow {
+func TheyDontFollow(followers, following []MetaFollow) []MetaFollow {
 	m := make(map[string]MetaFollow)
 	for _, follower := range followers {
 		if _, ok := m[follower.Username]; !ok {

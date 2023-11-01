@@ -22,7 +22,7 @@
 			<header>
 				<h1>Hello, {{.User.Login}}</h1>
 				<details open>
-					<summary role="button" class="secondary">Here are your Mutuals</summary>
+					<summary role="button" class="secondary">These are your mutuals</summary>
 					<ul>
 						{{range .Mutuals}}
 						<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
@@ -30,7 +30,7 @@
 					</ul>
 				</details>
 				<details>
-					<summary role="button" class="secondary">Here are your Followers that don't follow you</summary>
+					<summary role="button" class="secondary">{{.User.Login}} these accounts don't follow you</summary>
 					<ul>
 						{{range .TheyDontFollow}}
 						<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
@@ -38,7 +38,7 @@
 					</ul>
 				</details>
 				<details>
-					<summary role="button" class="secondary">Here are your Following you don't follow</summary>
+					<summary role="button" class="secondary">{{.User.Login}} you don't follow these accounts</summary>
 					<ul>
 						{{range .IDontFollow}}
 						<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
@@ -47,7 +47,7 @@
 				</details>
 			</header>
 			<main>
-				<h4>Did you followers/followers change?</h4>
+				<h4>Did your followers/followers change?</h4>
 				<p>
 					Want to Check Again?
 				</p>

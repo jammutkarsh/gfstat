@@ -58,7 +58,7 @@ func TestFollowersYouDontFollow(t *testing.T) {
 		Following: input.Following,
 	}
 	t.Run("Test 1", func(t *testing.T) {
-		if got := FollowersYouDontFollow(f.Followers, f.Following); !reflect.DeepEqual(got, want) {
+		if got := IDontFollow(f.Followers, f.Following); !reflect.DeepEqual(got, want) {
 			t.Errorf("\nFollowersYouDontFollow() = %v\nwant %v", got, want)
 		}
 	})
@@ -73,7 +73,7 @@ func TestFollowingYouDontFollow(t *testing.T) {
 		Following: input.Following,
 	}
 	t.Run("Test 1", func(t *testing.T) {
-		if got := FollowingYouDontFollow(f.Followers, f.Following); !reflect.DeepEqual(got, want) {
+		if got := TheyDontFollow(f.Followers, f.Following); !reflect.DeepEqual(got, want) {
 			t.Errorf("\nFollowingYouDontFollow() = %v\nwant %v", got, want)
 		}
 	})

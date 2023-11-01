@@ -90,8 +90,8 @@ func Result(w http.ResponseWriter, r *http.Request) {
 
 	// Get the mutuals of the user
 	mutuals := Mutuals(followers, following)
-	iDontFollow := FollowersYouDontFollow(followers, following)
-	theyDontFollow := FollowingYouDontFollow(followers, following)
+	iDontFollow := IDontFollow(followers, following)
+	theyDontFollow := TheyDontFollow(followers, following)
 	basicPageData := BasicPageData{githubPublicID, *user, mutuals, iDontFollow, theyDontFollow}
 	render := template.Must(template.New("basic.html").ParseFiles("views/basic.html"))
 	if err := render.Execute(w, basicPageData); err != nil {
