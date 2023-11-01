@@ -45,7 +45,7 @@ func serveWebApp() {
 
 // The Index function renders the index page template and sends it as a response to the client.
 func Index(w http.ResponseWriter, r *http.Request) {
-	indexPage := template.Must(template.New("index.html").ParseFiles("views/index.html"))
+	indexPage := template.Must(template.New("index.html").ParseFiles("./views/index.html"))
 	if err := indexPage.Execute(w, indexPageData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -93,7 +93,7 @@ func Result(w http.ResponseWriter, r *http.Request) {
 	iDontFollow := IDontFollow(followers, following)
 	theyDontFollow := TheyDontFollow(followers, following)
 	basicPageData := BasicPageData{githubPublicID, *user, mutuals, iDontFollow, theyDontFollow}
-	render := template.Must(template.New("basic.html").ParseFiles("views/basic.html"))
+	render := template.Must(template.New("basic.html").ParseFiles("./views/basic.html"))
 	if err := render.Execute(w, basicPageData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
