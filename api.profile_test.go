@@ -10,7 +10,7 @@ import (
 const testInput = "./testData/test.input.json"
 
 var input struct {
-	Username  string `json:"username"`
+	Username  string       `json:"username"`
 	Followers []MetaFollow `json:"followers"`
 	Following []MetaFollow `json:"following"`
 }

@@ -37,8 +37,8 @@ func main() {
 		WithExec([]string{"apk", "add", "--no-cache", "git"}).
 		WithExec([]string{"go", "get", "-d", "-v", "./..."}).
 		WithExec([]string{"go", "build", "-o", buildPath, "-v", "./..."})
-	
-		prodImg := client.Container().From("alpine:latest").
+
+	prodImg := client.Container().From("alpine:latest").
 		WithExec([]string{"apk", "add", "--no-cache", "ca-certificates"}).
 		WithSecretVariable("GH_BASIC_CLIENT_ID", s1).
 		WithSecretVariable("GH_BASIC_SECRET_ID", s2).
