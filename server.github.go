@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -74,4 +75,21 @@ func getGitHubUser(client *github.Client) *github.User {
 		return nil
 	}
 	return user
+}
+
+func followOverflow(user github.User) error {
+	count := *user.Followers + *user.Following
+	/*
+		Logic: GitHub Provides a limit of 5000 Re per hour. Since this app is stateless, we don't store the user's followers and following.
+		user.FollowingURL and user.FollowersURL are paginated. It only provides 100 array objects(following or followers) per request.
+		Since we don't store the data, we need to make multiple requests to get the all the followers and following.
+		We calculate the total number of requests required to get all the followers and following.
+		We then check if the total number of requests exceeds the GitHub limit of 5000.
+		totalRequests = (followers + following) / 100 && the totoalRequests > 5000, we return an error. 
+		Why '5000-2' ? The first request is made to get AccessToken and the second request is made to get the user.
+	*/
+	if count/100 > 5000-2 {
+		return fmt.Errorf("you have too many followers and following (%d), it exceeds the GitHub limit of 5000", count)
+	}
+	return nil
 }

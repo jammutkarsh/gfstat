@@ -7,7 +7,9 @@ import (
 )
 
 func GETFollowers(c *github.Client, u github.User) (followers []MetaFollow, err error) {
-
+	if err := followOverflow(u); err != nil {
+		return nil, err
+	}
 	for pageCount := 1; pageCount <= numberOfPages(*u.Followers); pageCount++ {
 		opts := &github.ListOptions{Page: pageCount, PerPage: 100}
 
@@ -39,6 +41,9 @@ func GETFollowers(c *github.Client, u github.User) (followers []MetaFollow, err 
 }
 
 func GETFollowing(c *github.Client, u github.User) (followers []MetaFollow, err error) {
+	if err := followOverflow(u); err != nil {
+		return nil, err
+	}
 	for pageCount := 1; pageCount <= numberOfPages(*u.Following); pageCount++ {
 		opts := &github.ListOptions{Page: pageCount, PerPage: 100}
 
