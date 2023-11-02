@@ -3,12 +3,12 @@ module github.com/JammUtkarsh/gfstat
 go 1.19
 
 require (
-	dagger.io/dagger v0.9.2
 	github.com/google/go-github/v56 v56.0.0
 	golang.org/x/oauth2 v0.13.0
 )
 
 require (
+	dagger.io/dagger v0.9.2 // indirect
 	github.com/99designs/gqlgen v0.17.31 // indirect
 	github.com/Khan/genqlient v0.6.0 // indirect
 	github.com/adrg/xdg v0.4.0 // indirect
