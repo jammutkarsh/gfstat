@@ -14,10 +14,10 @@ import (
 
 func main() {
 	var (
-		binPath   string          = "/go/bin/gfstat"
+		binPath     string          = "/go/bin/gfstat"
 		workDir     string          = "/go/src/gfstat"
 		exportedTar string          = "./gfstat.tar"
-		imageName   string          = "gfstat" + ":latest"
+		imageName   string          = "gfstat:" + os.Getenv("GFV")
 		ctx         context.Context = context.Background()
 		err         error
 	)
