@@ -16,4 +16,25 @@ It's a side project to learn a bunch of new technologies and tools and practice 
 ## Tech Involved
 
 - About 99% of the project is built in [Go](https://go.dev/) the rest of it is simple HTML templating.
-- The only external dependeny that I have used is [GitHub's Go SDK](https://pkg.go.dev/github.com/google/go-github/v56#section-readme), the rest of application is built standard library.
+- The only external dependency that I have used is [GitHub's Go SDK](https://pkg.go.dev/github.com/google/go-github/v56#section-readme), the rest of application is built standard library.
+
+
+## Local Dev
+
+To run and debug this program locally:
+
+Prepare a `.env` file
+
+```env
+GH_BASIC_CLIENT_ID=1234abc
+GH_BASIC_SECRET_ID=1234xyz
+```
+
+These two values which you get from [New OAuth App](https://github.com/settings/developers). Then:
+
+```bash
+export $(cat .env | xargs) # to set env vars from .env
+go run . # you are up and running.
+```
+
+[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=93388f4a1ca0&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
