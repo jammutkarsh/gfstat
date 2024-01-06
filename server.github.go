@@ -28,6 +28,13 @@ var (
 	internalGitHubCtx = context.Background()
 )
 
+func init() {
+	// check for env vars
+	if githubPublicID == "" || githubServerSecret == "" {
+		panic("GitHub OAuth2.0 Client ID and Secret ID not set")
+	}
+}
+
 // getAccessToken returns the access token from the GitHub OAuth2.0 API
 func getAccessToken(w http.ResponseWriter, r *http.Request) (creds access) {
 	sessionToken := r.URL.Query().Get("code")

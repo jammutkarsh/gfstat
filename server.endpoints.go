@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"sync"
 	"text/template"
 
 	"github.com/google/go-github/v56/github"
@@ -11,13 +12,6 @@ import (
 const port = "3639"
 
 var indexPageData = IndexPageData{githubPublicID}
-
-func init() {
-	// check for env vars
-	if githubPublicID == "" || githubServerSecret == "" {
-		panic("GitHub OAuth2.0 Client ID and Secret ID not set")
-	}
-}
 
 // Using Access Token and GitHub SDK can facilitate the use of GitHub API directly to structs.
 type BasicPageData struct {
@@ -98,11 +92,22 @@ func Result(w http.ResponseWriter, r *http.Request) {
 		renderErrorPage(w, err)
 		return
 	}
+	c := make(chan []MetaFollow)
+	var wg sync.WaitGroup
 
-	mutuals := Mutuals(followers, following)
-	iDontFollow := IDontFollow(followers, following)
-	theyDontFollow := TheyDontFollow(followers, following)
+	wg.Add(1)
+	go Mutuals(followers, following, c, &wg)
+	mutuals := <-c
 
+	wg.Add(1)
+	go IDontFollow(followers, following, c, &wg)
+	iDontFollow := <-c
+
+	wg.Add(1)
+	go TheyDontFollow(followers, following, c, &wg)
+	theyDontFollow := <-c
+
+	wg.Wait()
 	basicPageData := BasicPageData{githubPublicID, *user, mutuals, iDontFollow, theyDontFollow}
 	render := template.Must(template.New("basic.html").ParseFiles("./views/basic.html"))
 	if err := render.Execute(w, basicPageData); err != nil {
