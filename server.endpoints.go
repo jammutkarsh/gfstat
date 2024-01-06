@@ -98,19 +98,17 @@ func Result(w http.ResponseWriter, r *http.Request) {
 	c := make(chan []MetaFollow, 3)
 	var wg sync.WaitGroup
 
-	wg.Add(1)
+	wg.Add(3)
 	go Mutuals(followers, following, c, &wg)
 	mutuals := <-c
 
-	wg.Add(1)
 	go IDontFollow(followers, following, c, &wg)
 	iDontFollow := <-c
 
-	wg.Add(1)
 	go TheyDontFollow(followers, following, c, &wg)
 	theyDontFollow := <-c
-
 	wg.Wait()
+
 	basicPageData := BasicPageData{githubPublicID, *user, mutuals, iDontFollow, theyDontFollow}
 	render := template.Must(template.New("basic.html").ParseFiles("./views/basic.html"))
 	if err := render.Execute(w, basicPageData); err != nil {
