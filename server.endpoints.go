@@ -92,7 +92,10 @@ func Result(w http.ResponseWriter, r *http.Request) {
 		renderErrorPage(w, err)
 		return
 	}
-	c := make(chan []MetaFollow)
+	/* The increased capacity of channel avoids deadlock for the c variable.
+	The 3 go routines can run in concurrently without blocking each other.
+	*/
+	c := make(chan []MetaFollow, 3)
 	var wg sync.WaitGroup
 
 	wg.Add(1)
