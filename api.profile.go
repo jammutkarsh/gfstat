@@ -1,5 +1,7 @@
 package main
 
+import "sync"
+
 type AccountType int
 
 const (
@@ -16,9 +18,10 @@ type MetaFollow struct {
 // Mutuals gives the list of mutuals between followers and following.
 // TC: O(nLogn)
 // SC: O(1)
-func Mutuals(followers, following []MetaFollow) []MetaFollow {
+func Mutuals(followers, following []MetaFollow, c chan []MetaFollow, wg *sync.WaitGroup) {
+	defer wg.Done()
 	if len(followers) == 0 || len(following) == 0 {
-		return nil
+		return
 	}
 	var mutuals []MetaFollow
 	for _, follower := range followers {
@@ -35,13 +38,14 @@ func Mutuals(followers, following []MetaFollow) []MetaFollow {
 			}
 		}
 	}
-	return mutuals
+	c <- mutuals
 }
 
 // followers - following
 // TC: O(n)
 // SC: O(N)
-func IDontFollow(followers, following []MetaFollow) []MetaFollow {
+func IDontFollow(followers, following []MetaFollow, c chan []MetaFollow, wg *sync.WaitGroup) {
+	defer wg.Done()
 	m := make(map[string]MetaFollow)
 	for _, following := range following {
 		m[following.Username] = following
@@ -53,13 +57,14 @@ func IDontFollow(followers, following []MetaFollow) []MetaFollow {
 			iDontFollow = append(iDontFollow, follower)
 		}
 	}
-	return iDontFollow
+	c <- iDontFollow
 }
 
 // following - followers
 // TC: O(n)
 // SC: O(N)
-func TheyDontFollow(followers, following []MetaFollow) []MetaFollow {
+func TheyDontFollow(followers, following []MetaFollow, c chan []MetaFollow, wg *sync.WaitGroup) {
+	defer wg.Done()
 	m := make(map[string]MetaFollow)
 	for _, follower := range followers {
 		if _, ok := m[follower.Username]; !ok {
@@ -73,6 +78,5 @@ func TheyDontFollow(followers, following []MetaFollow) []MetaFollow {
 			iDontFollow = append(iDontFollow, following)
 		}
 	}
-
-	return iDontFollow
+	c <- iDontFollow
 }

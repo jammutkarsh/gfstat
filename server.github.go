@@ -28,6 +28,14 @@ var (
 	internalGitHubCtx = context.Background()
 )
 
+func init() {
+	// check for env vars
+	if githubPublicID == "" || githubServerSecret == "" {
+		log.Fatal("GH_BASIC_CLIENT_ID and GH_BASIC_SECRET_ID must be set")
+		os.Exit(1)
+	}
+}
+
 // getAccessToken returns the access token from the GitHub OAuth2.0 API
 func getAccessToken(w http.ResponseWriter, r *http.Request) (creds access) {
 	sessionToken := r.URL.Query().Get("code")
@@ -85,7 +93,7 @@ func followOverflow(user github.User) error {
 		Since we don't store the data, we need to make multiple requests to get the all the followers and following.
 		We calculate the total number of requests required to get all the followers and following.
 		We then check if the total number of requests exceeds the GitHub limit of 5000.
-		totalRequests = (followers + following) / 100 && the totoalRequests > 5000, we return an error. 
+		totalRequests = (followers + following) / 100 && the totoalRequests > 5000, we return an error.
 		Why '5000-2' ? The first request is made to get AccessToken and the second request is made to get the user.
 	*/
 	if count/100 > 5000-2 {
