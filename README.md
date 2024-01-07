@@ -18,7 +18,6 @@ It's a side project to learn a bunch of new technologies and tools and practice 
 - About 99% of the project is built in [Go](https://go.dev/) the rest of it is simple HTML templating.
 - The only external dependency that I have used is [GitHub's Go SDK](https://pkg.go.dev/github.com/google/go-github/v56#section-readme), the rest of application is built standard library.
 
-
 ## Local Dev
 
 To run and debug this program locally:

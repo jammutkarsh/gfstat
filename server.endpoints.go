@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"sync"
 	"text/template"
@@ -32,7 +32,7 @@ type UnknownError struct {
 }
 
 func serveWebApp() {
-	fmt.Println("Serving Web App on port: ", port)
+	log.Println("Serving Web App on port: ", port)
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/result", Result)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
@@ -54,7 +54,7 @@ func renderErrorPage(w http.ResponseWriter, err error) {
 	if err := render.Execute(w, htmlErr); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	fmt.Println("Error: ", err)
+	log.Println("Error: ", err)
 }
 
 // The Result function renders the result page template and sends it as a response to the client.
@@ -76,18 +76,18 @@ func Result(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "https://github.com/login/oauth/authorize?scope=user:follow&read:user&client_id="+githubPublicID, http.StatusTemporaryRedirect)
 		return
 	}
-	client := getGitHubClient(&accessKeys.AccessToken)
-	user := getGitHubUser(client)
+	ghClient := getGitHubClient(&accessKeys.AccessToken)
+	ghUser := getGitHubUser(ghClient)
 
 	// Get the followers of the user
-	followers, err := GETFollowers(client, *user)
+	followers, err := GETFollowers(ghClient, *ghUser)
 	if err != nil {
 		renderErrorPage(w, err)
 		return
 	}
 
 	// Get the following of the user
-	following, err := GETFollowing(client, *user)
+	following, err := GETFollowing(ghClient, *ghUser)
 	if err != nil {
 		renderErrorPage(w, err)
 		return
@@ -95,26 +95,26 @@ func Result(w http.ResponseWriter, r *http.Request) {
 	/* The increased capacity of channel avoids deadlock for the c variable.
 	The 3 go routines can run in concurrently without blocking each other.
 	*/
-	c := make(chan []MetaFollow, 3)
+	// results, resultsCh := make([][]MetaFollow, 3), make([]chan []MetaFollow, 3)
+	resultsCh := make([]chan []MetaFollow, 3)
+	for i := range resultsCh {
+		resultsCh[i] = make(chan []MetaFollow, 1)
+	}
 	var wg sync.WaitGroup
-
 	wg.Add(3)
-	go Mutuals(followers, following, c, &wg)
-	mutuals := <-c
-
-	go IDontFollow(followers, following, c, &wg)
-	iDontFollow := <-c
-
-	go TheyDontFollow(followers, following, c, &wg)
-	theyDontFollow := <-c
+	go Mutuals(followers, following, resultsCh[0], &wg)
+	go IDontFollow(followers, following, resultsCh[1], &wg)
+	go TheyDontFollow(followers, following, resultsCh[2], &wg)
 	wg.Wait()
-
-	basicPageData := BasicPageData{githubPublicID, *user, mutuals, iDontFollow, theyDontFollow}
+	close(resultsCh[0])
+	close(resultsCh[1])
+	close(resultsCh[2])
+	basicPageData := BasicPageData{githubPublicID, *ghUser, <-resultsCh[0], <-resultsCh[1], <-resultsCh[2]}
 	render := template.Must(template.New("basic.html").ParseFiles("./views/basic.html"))
 	if err := render.Execute(w, basicPageData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Println("Result Page Served for user: ", *user.Login)
+	log.Println("Result Page Served for user: ", *ghUser.Login)
 }
