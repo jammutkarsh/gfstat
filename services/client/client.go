@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"context"
@@ -10,11 +10,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 )
 
-// access is the response from the GitHub OAuth2.0 API
 type access struct {
 	AccessToken string `json:"access_token"`
 	Scope       string // Scope lets us know what rights we have to the user's account
@@ -22,7 +21,7 @@ type access struct {
 
 var (
 	// GitHub OAuth Config
-	githubPublicID     = os.Getenv("GH_BASIC_CLIENT_ID") // like public key
+	GithubPublicID     = os.Getenv("GH_BASIC_CLIENT_ID") // like public key
 	githubServerSecret = os.Getenv("GH_BASIC_SECRET_ID") // like private key
 	// Context
 	internalGitHubCtx = context.Background()
@@ -30,16 +29,16 @@ var (
 
 func init() {
 	// check for env vars
-	if githubPublicID == "" || githubServerSecret == "" {
+	if GithubPublicID == "" || githubServerSecret == "" {
 		log.Fatal("GH_BASIC_CLIENT_ID and GH_BASIC_SECRET_ID must be set")
 		os.Exit(1)
 	}
 }
 
 // getAccessToken returns the access token from the GitHub OAuth2.0 API
-func getAccessToken(w http.ResponseWriter, r *http.Request) (creds access) {
+func GetAccessToken(w http.ResponseWriter, r *http.Request) (creds access) {
 	sessionToken := r.URL.Query().Get("code")
-	body := url.Values{"client_id": {githubPublicID}, "client_secret": {githubServerSecret}, "code": {sessionToken}, "accept": {"json"}}
+	body := url.Values{"client_id": {GithubPublicID}, "client_secret": {githubServerSecret}, "code": {sessionToken}, "accept": {"json"}}
 
 	req, _ := http.NewRequest("POST", "https://github.com/login/oauth/access_token", strings.NewReader(body.Encode()))
 	req.Header.Set("Accept", "application/json")
@@ -66,7 +65,7 @@ func getAccessToken(w http.ResponseWriter, r *http.Request) (creds access) {
 // Authenticates GitHub Client with provided OAuth access token
 // this client allows us to make make changes directly to the user's GitHub account
 // without needing to manually enter various URLs and tokens
-func getGitHubClient(accessToken *string) *github.Client {
+func GetGitHubClient(accessToken *string) *github.Client {
 	ctx := internalGitHubCtx
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: *accessToken},
@@ -76,7 +75,7 @@ func getGitHubClient(accessToken *string) *github.Client {
 }
 
 // getGitHubUser returns the GitHub user associated with the provided GitHub client
-func getGitHubUser(client *github.Client) *github.User {
+func GetGitHubUser(client *github.Client) *github.User {
 	user, _, err := client.Users.Get(internalGitHubCtx, "")
 	if err != nil {
 		log.Println(err)

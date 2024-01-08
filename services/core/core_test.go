@@ -1,4 +1,4 @@
-package main
+package core
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const testInput = "./testData/test.input.json"
+const testInput = "../../testData/test.input.json"
 
 var input struct {
 	Username  string       `json:"username"`
@@ -40,7 +40,7 @@ func prepareTests(v any, file string) {
 func TestMutuals(t *testing.T) {
 	t.Parallel()
 	var want []MetaFollow
-	prepareTests(&want, "./testData/test.output.mutuals.json")
+	prepareTests(&want, "../../testData/test.output.mutuals.json")
 	f := testFields{
 		Followers: input.Followers,
 		Following: input.Following,
@@ -62,7 +62,7 @@ func TestMutuals(t *testing.T) {
 func TestFollowersYouDontFollow(t *testing.T) {
 	t.Parallel()
 	var want []MetaFollow
-	prepareTests(&want, "./testData/test.output.iDontFollow.json")
+	prepareTests(&want, "../../testData/test.output.iDontFollow.json")
 	f := testFields{
 		Followers: input.Followers,
 		Following: input.Following,
@@ -84,7 +84,7 @@ func TestFollowersYouDontFollow(t *testing.T) {
 func TestFollowingYouDontFollow(t *testing.T) {
 	t.Parallel()
 	var want []MetaFollow
-	prepareTests(&want, "./testData/test.output.theyDontFollow.json")
+	prepareTests(&want, "../../testData/test.output.theyDontFollow.json")
 	f := testFields{
 		Followers: input.Followers,
 		Following: input.Following,

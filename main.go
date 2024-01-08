@@ -1,5 +1,7 @@
 package main
 
+import "github.com/JammUtkarsh/gfstat/services/web"
+
 
 func main() {
 	// var username string
@@ -8,5 +10,5 @@ func main() {
 	// and the program will run and output the result to output.txt
 	// This is useful for testing.
 	// fmt.Println("Enter username: ") // breaks jq pipe
-	serveWebApp()
+	web.ServeWebApp()
 }

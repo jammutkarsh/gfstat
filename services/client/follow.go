@@ -1,12 +1,13 @@
-package main
+package client
 
 import (
 	"sort"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/JammUtkarsh/gfstat/services/core"
+	"github.com/google/go-github/github"
 )
 
-func GETFollowers(c *github.Client, u github.User) (followers []MetaFollow, err error) {
+func GETFollowers(c *github.Client, u github.User) (followers []core.MetaFollow, err error) {
 	if err := followOverflow(u); err != nil {
 		return nil, err
 	}
@@ -25,7 +26,7 @@ func GETFollowers(c *github.Client, u github.User) (followers []MetaFollow, err 
 		}
 
 		for _, v := range follow {
-			followers = append(followers, MetaFollow{
+			followers = append(followers, core.MetaFollow{
 				Username: *v.Login,
 				HTMLURL:  *v.HTMLURL,
 			})
@@ -40,7 +41,7 @@ func GETFollowers(c *github.Client, u github.User) (followers []MetaFollow, err 
 	return followers, nil
 }
 
-func GETFollowing(c *github.Client, u github.User) (followers []MetaFollow, err error) {
+func GETFollowing(c *github.Client, u github.User) (followers []core.MetaFollow, err error) {
 	if err := followOverflow(u); err != nil {
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func GETFollowing(c *github.Client, u github.User) (followers []MetaFollow, err 
 		}
 
 		for _, v := range follow {
-			followers = append(followers, MetaFollow{
+			followers = append(followers, core.MetaFollow{
 				Username: *v.Login,
 				HTMLURL:  *v.HTMLURL,
 			})
