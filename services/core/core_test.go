@@ -2,103 +2,95 @@ package core
 
 import (
 	"encoding/json"
-	"os"
 	"reflect"
 	"sync"
 	"testing"
 )
 
-const testInput = "../../testData/test.input.json"
-
-var input struct {
-	Username  string       `json:"username"`
-	Followers []MetaFollow `json:"followers"`
-	Following []MetaFollow `json:"following"`
-}
-
-type testFields struct {
+type outputFields struct {
 	Followers []MetaFollow
 	Following []MetaFollow
 	chann     chan []MetaFollow
 	wg        sync.WaitGroup
 }
 
-func init() {
-	prepareTests(&input, testInput)
+var inputField struct {
+	Username  string       `json:"username"`
+	Followers []MetaFollow `json:"followers"`
+	Following []MetaFollow `json:"following"`
 }
 
-func prepareTests(v any, file string) {
-	bytes, err := os.ReadFile(file)
-	if err != nil {
-		panic("error in reading test file:" + err.Error() + "\n")
-	}
-	if err := json.Unmarshal(bytes, v); err != nil {
-		panic("error in converting test file to JSON:" + err.Error() + "\n")
+func init() {
+	if err := json.Unmarshal([]byte(testInput), &inputField); err != nil {
+		panic(err)
 	}
 }
 
 func TestMutuals(t *testing.T) {
 	t.Parallel()
 	var want []MetaFollow
-	prepareTests(&want, "../../testData/test.output.mutuals.json")
-	f := testFields{
-		Followers: input.Followers,
-		Following: input.Following,
-		chann:     make(chan []MetaFollow), // Add channel initialization
-		wg:        sync.WaitGroup{},
+	if err := json.Unmarshal([]byte(testMutuals), &want); err != nil {
+		t.Fatalf("Error in unmarshalling output: %v", err)
 	}
-	t.Run("Test 1", func(t *testing.T) {
-		f.wg.Add(1)
-		go Mutuals(f.Followers, f.Following, f.chann, &f.wg)
-		got := <-f.chann // Receive value from channel
-		close(f.chann)   // Close the channel after receiving the value
-		f.wg.Wait()
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("\nMutuals() = %v\nwant %v", got, want)
-		}
-	})
+	f := outputFields{inputField.Followers, inputField.Following, make(chan []MetaFollow), sync.WaitGroup{}}
+	f.wg.Add(1)
+	defer f.wg.Wait()
+	go Mutuals(f.Followers, f.Following, f.chann, &f.wg)
+	if got := <-f.chann; !reflect.DeepEqual(got, want) {
+		t.Errorf("\nMutuals() = %v\nwant %v", got, want)
+	}
 }
 
 func TestFollowersYouDontFollow(t *testing.T) {
 	t.Parallel()
 	var want []MetaFollow
-	prepareTests(&want, "../../testData/test.output.iDontFollow.json")
-	f := testFields{
-		Followers: input.Followers,
-		Following: input.Following,
-		chann:     make(chan []MetaFollow),
-		wg:        sync.WaitGroup{},
+	if err := json.Unmarshal([]byte(testIDontFollow), &want); err != nil {
+		t.Fatalf("Error in unmarshalling output: %v", err)
 	}
-	t.Run("Test 1", func(t *testing.T) {
-		f.wg.Add(1)
-		go IDontFollow(f.Followers, f.Following, f.chann, &f.wg)
-		got := <-f.chann
-		close(f.chann)
-		f.wg.Wait()
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("\nFollowersYouDontFollow() = %v\nwant %v", got, want)
-		}
-	})
+	f := outputFields{inputField.Followers, inputField.Following, make(chan []MetaFollow), sync.WaitGroup{}}
+	f.wg.Add(1)
+	defer f.wg.Wait()
+	go IDontFollow(f.Followers, f.Following, f.chann, &f.wg)
+	if got := <-f.chann; !reflect.DeepEqual(got, want) {
+		t.Errorf("\nFollowersYouDontFollow() = %v\nwant %v", got, want)
+	}
 }
 
 func TestFollowingYouDontFollow(t *testing.T) {
 	t.Parallel()
 	var want []MetaFollow
-	prepareTests(&want, "../../testData/test.output.theyDontFollow.json")
-	f := testFields{
-		Followers: input.Followers,
-		Following: input.Following,
-		chann:     make(chan []MetaFollow),
-		wg:        sync.WaitGroup{},
+	f := outputFields{inputField.Followers, inputField.Following, make(chan []MetaFollow), sync.WaitGroup{}}
+	if err := json.Unmarshal([]byte(testTheyDontFollow), &want); err != nil {
+		t.Fatalf("Error in unmarshalling output: %v", err)
 	}
-	t.Run("Test 1", func(t *testing.T) {
-		f.wg.Add(1)
-		go TheyDontFollow(f.Followers, f.Following, f.chann, &f.wg)
-		got := <-f.chann
-		close(f.chann)
-		f.wg.Wait()
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("\nFollowingYouDontFollow() = %v\nwant %v", got, want)
-		}
-	})
+	f.wg.Add(1)
+	defer f.wg.Wait()
+	go TheyDontFollow(f.Followers, f.Following, f.chann, &f.wg)
+	if got := <-f.chann; !reflect.DeepEqual(got, want) {
+		t.Errorf("\nFollowingYouDontFollow() = %v\nwant %v", got, want)
+	}
 }
+
+const (
+	// Testcases
+	testInput = `{"username":"soumyyyaaa","followers": [{"username":"JammUtkarsh","html_url":"https://github.com/JammUtkarsh"},{"username":"MadhaviGupta","html_url":"https://github.com/MadhaviGupta"},
+	{"username":"Mishank24","html_url":"https://github.com/Mishank24"},{"username":"SparshGarg1","html_url":"https://github.com/SparshGarg1"},
+	{"username":"SujalSamai","html_url":"https://github.com/SujalSamai"},{"username":"TheGameisYash","html_url":"https://github.com/TheGameisYash"},
+	{"username":"dcdeepesh","html_url":"https://github.com/dcdeepesh"},{"username":"golemvincible","html_url":"https://github.com/golemvincible"},
+	{"username":"shreyash2002","html_url":"https://github.com/shreyash2002"},{"username":"shristigupta12","html_url":"https://github.com/shristigupta12"},
+	{"username":"sushantsharma08","html_url":"https://github.com/sushantsharma08"},{"username":"tanishjain158","html_url":"https://github.com/tanishjain158"}],
+	"following":[{"username":"JammUtkarsh","html_url":"https://github.com/JammUtkarsh"},{"username":"MadhaviGupta","html_url":"https://github.com/MadhaviGupta"},
+	{"username":"Mishank24","html_url":"https://github.com/Mishank24"},{"username":"SparshGarg1","html_url":"https://github.com/SparshGarg1"},
+	{"username":"SujalSamai","html_url":"https://github.com/SujalSamai"},{"username":"TheGameisYash","html_url":"https://github.com/TheGameisYash"},
+	{"username":"dcdeepesh","html_url":"https://github.com/dcdeepesh"},{"username":"dxaman","html_url":"https://github.com/dxaman"},
+	{"username":"golemvincible","html_url":"https://github.com/golemvincible"},{"username":"shreyash2002","html_url":"https://github.com/shreyash2002"},
+	{"username":"shristigupta12","html_url":"https://github.com/shristigupta12"},{"username":"sushantsharma08","html_url":"https://github.com/sushantsharma08"}]}`
+	testMutuals = `[{"username":"JammUtkarsh","html_url":"https://github.com/JammUtkarsh"},{"username":"MadhaviGupta","html_url":"https://github.com/MadhaviGupta"},
+	{"username":"Mishank24","html_url":"https://github.com/Mishank24"},{"username":"SparshGarg1","html_url":"https://github.com/SparshGarg1"},
+	{"username":"SujalSamai","html_url":"https://github.com/SujalSamai"},{"username":"TheGameisYash","html_url":"https://github.com/TheGameisYash"},
+	{"username":"dcdeepesh","html_url":"https://github.com/dcdeepesh"},{"username":"golemvincible","html_url":"https://github.com/golemvincible"},
+	{"username":"shreyash2002","html_url":"https://github.com/shreyash2002"},{"username":"shristigupta12","html_url":"https://github.com/shristigupta12"},
+	{"username":"sushantsharma08","html_url":"https://github.com/sushantsharma08"}]`
+	testIDontFollow    = `[{"username":"tanishjain158","html_url":"https://github.com/tanishjain158"}]`
+	testTheyDontFollow = `[{"username":"dxaman","html_url":"https://github.com/dxaman"}]`
+)
