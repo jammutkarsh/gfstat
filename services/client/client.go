@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -19,12 +18,11 @@ type access struct {
 	Scope       string // Scope lets us know what rights we have to the user's account
 }
 
+var GithubPublicID = os.Getenv("GH_BASIC_CLIENT_ID") // like public key
+
 var (
-	// GitHub OAuth Config
-	GithubPublicID     = os.Getenv("GH_BASIC_CLIENT_ID") // like public key
 	githubServerSecret = os.Getenv("GH_BASIC_SECRET_ID") // like private key
-	// Context
-	internalGitHubCtx = context.Background()
+	ctx                = context.Background()
 )
 
 func init() {
@@ -66,37 +64,19 @@ func GetAccessToken(w http.ResponseWriter, r *http.Request) (creds access) {
 // this client allows us to make make changes directly to the user's GitHub account
 // without needing to manually enter various URLs and tokens
 func GetGitHubClient(accessToken *string) *github.Client {
-	ctx := internalGitHubCtx
-	ts := oauth2.StaticTokenSource(
+	tokenString := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: *accessToken},
 	)
-	tc := oauth2.NewClient(ctx, ts)
-	return github.NewClient(tc)
+	client  := oauth2.NewClient(ctx, tokenString)
+	return github.NewClient(client)
 }
 
 // getGitHubUser returns the GitHub user associated with the provided GitHub client
-func GetGitHubUser(client *github.Client) *github.User {
-	user, _, err := client.Users.Get(internalGitHubCtx, "")
+func GetGitHubUser(client *github.Client) (*github.User, *github.Response) {
+	user, resp , err := client.Users.Get(ctx, "")
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, nil
 	}
-	return user
-}
-
-func followOverflow(user github.User) error {
-	count := *user.Followers + *user.Following
-	/*
-		Logic: GitHub Provides a limit of 5000 Re per hour. Since this app is stateless, we don't store the user's followers and following.
-		user.FollowingURL and user.FollowersURL are paginated. It only provides 100 array objects(following or followers) per request.
-		Since we don't store the data, we need to make multiple requests to get the all the followers and following.
-		We calculate the total number of requests required to get all the followers and following.
-		We then check if the total number of requests exceeds the GitHub limit of 5000.
-		totalRequests = (followers + following) / 100 && the totoalRequests > 5000, we return an error.
-		Why '5000-2' ? The first request is made to get AccessToken and the second request is made to get the user.
-	*/
-	if count/100 > 5000-2 {
-		return fmt.Errorf("you have too many followers and following (%d), it exceeds the GitHub limit of 5000", count)
-	}
-	return nil
+	return user, resp
 }

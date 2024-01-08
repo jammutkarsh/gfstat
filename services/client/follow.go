@@ -1,20 +1,24 @@
 package client
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/JammUtkarsh/gfstat/services/core"
 	"github.com/google/go-github/github"
 )
 
-func GETFollowers(c *github.Client, u github.User) (followers []core.MetaFollow, err error) {
-	if err := followOverflow(u); err != nil {
-		return nil, err
-	}
-	for pageCount := 1; pageCount <= numberOfPages(*u.Followers); pageCount++ {
-		opts := &github.ListOptions{Page: pageCount, PerPage: 100}
+const (
+	pageLimit = 100
+	reqLimit  = 5000 -2
+)
 
-		follow, res, err := c.Users.ListFollowers(internalGitHubCtx, *u.Login, opts)
+func GETFollowers(c *github.Client, u github.User, resp github.Response) (followers []core.MetaFollow, err error) {
+	if count := *u.Followers + *u.Following; count/pageLimit > reqLimit {
+		return nil, fmt.Errorf("you have too many followers and following: %d", count)
+	}
+	for i := 0; i <= resp.LastPage; i++ {
+		follow, res, err := c.Users.ListFollowers(ctx, *u.Login, &github.ListOptions{Page: i, PerPage: pageLimit})
 		if err != nil {
 			return nil, err
 		}
@@ -41,14 +45,12 @@ func GETFollowers(c *github.Client, u github.User) (followers []core.MetaFollow,
 	return followers, nil
 }
 
-func GETFollowing(c *github.Client, u github.User) (followers []core.MetaFollow, err error) {
-	if err := followOverflow(u); err != nil {
-		return nil, err
+func GETFollowing(c *github.Client, u github.User, resp github.Response) (followings []core.MetaFollow, err error) {
+	if count := *u.Followers + *u.Following; count/pageLimit > reqLimit {
+		return nil, fmt.Errorf("you have too many followers and following: %d", count)
 	}
-	for pageCount := 1; pageCount <= numberOfPages(*u.Following); pageCount++ {
-		opts := &github.ListOptions{Page: pageCount, PerPage: 100}
-
-		follow, res, err := c.Users.ListFollowing(internalGitHubCtx, *u.Login, opts)
+	for i := 0; i <= resp.LastPage; i++ {
+		follow, res, err := c.Users.ListFollowing(ctx, *u.Login, &github.ListOptions{Page: i, PerPage: pageLimit})
 		if err != nil {
 			return nil, err
 		}
@@ -60,7 +62,7 @@ func GETFollowing(c *github.Client, u github.User) (followers []core.MetaFollow,
 		}
 
 		for _, v := range follow {
-			followers = append(followers, core.MetaFollow{
+			followings = append(followings, core.MetaFollow{
 				Username: *v.Login,
 				HTMLURL:  *v.HTMLURL,
 			})
@@ -68,17 +70,10 @@ func GETFollowing(c *github.Client, u github.User) (followers []core.MetaFollow,
 
 	}
 
-	sort.Slice(followers, func(i, j int) bool {
-		return followers[i].Username < followers[j].Username
+	sort.Slice(followings, func(i, j int) bool {
+		return followings[i].Username < followings[j].Username
 	})
 
-	return followers, nil
+	return followings, nil
 
-}
-
-func numberOfPages(followCount int) int {
-	if followCount < 100 {
-		return 1
-	}
-	return (followCount / 100) + 1
 }
