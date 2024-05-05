@@ -29,11 +29,10 @@ func init() {
 	// check for env vars
 	if GithubPublicID == "" || githubServerSecret == "" {
 		log.Fatal("GH_BASIC_CLIENT_ID and GH_BASIC_SECRET_ID must be set")
-		os.Exit(1)
 	}
 }
 
-// getAccessToken returns the access token from the GitHub OAuth2.0 API
+// GetAccessToken returns the access token from the GitHub OAuth2.0 API
 func GetAccessToken(w http.ResponseWriter, r *http.Request) (creds access) {
 	sessionToken := r.URL.Query().Get("code")
 	body := url.Values{"client_id": {GithubPublicID}, "client_secret": {githubServerSecret}, "code": {sessionToken}, "accept": {"json"}}
@@ -60,22 +59,21 @@ func GetAccessToken(w http.ResponseWriter, r *http.Request) (creds access) {
 	return creds
 }
 
-// Authenticates GitHub Client with provided OAuth access token
+// GetGitHubClient Authenticates GitHub Client with provided OAuth access token
 // this client allows us to make make changes directly to the user's GitHub account
 // without needing to manually enter various URLs and tokens
 func GetGitHubClient(accessToken *string) *github.Client {
 	tokenString := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: *accessToken},
 	)
-	client  := oauth2.NewClient(ctx, tokenString)
+	client := oauth2.NewClient(ctx, tokenString)
 	return github.NewClient(client)
 }
 
-// getGitHubUser returns the GitHub user associated with the provided GitHub client
+// GetGitHubUser returns the GitHub user associated with the provided GitHub client
 func GetGitHubUser(client *github.Client) (*github.User, *github.Response) {
-	user, resp , err := client.Users.Get(ctx, "")
+	user, resp, err := client.Users.Get(ctx, "")
 	if err != nil {
-		log.Println(err)
 		return nil, nil
 	}
 	return user, resp

@@ -2,20 +2,13 @@ package core
 
 import "sync"
 
-type AccountType int
-
-const (
-	User AccountType = iota
-	Organization
-)
-
 // MetaFollow stands for metadata of a follower/following.
 type MetaFollow struct {
 	Username string `json:"username"`
 	HTMLURL  string `json:"html_url"`
 }
 
-// Mutuals gives the list of mutuals between followers and following.
+// Mutuals give the list of mutual between followers and following.
 // TC: O(nLogn)
 // SC: O(1)
 func Mutuals(followers, following []MetaFollow, c chan []MetaFollow, wg *sync.WaitGroup) {
@@ -41,7 +34,7 @@ func Mutuals(followers, following []MetaFollow, c chan []MetaFollow, wg *sync.Wa
 	c <- results
 }
 
-// followers - following
+// IDontFollow = followers - following
 // TC: O(n)
 // SC: O(N)
 func IDontFollow(followers, followings []MetaFollow, c chan []MetaFollow, wg *sync.WaitGroup) {
@@ -60,7 +53,7 @@ func IDontFollow(followers, followings []MetaFollow, c chan []MetaFollow, wg *sy
 	c <- results
 }
 
-// following - followers
+// TheyDontFollow = following - followers
 // TC: O(n)
 // SC: O(N)
 func TheyDontFollow(followers, followings []MetaFollow, c chan []MetaFollow, wg *sync.WaitGroup) {

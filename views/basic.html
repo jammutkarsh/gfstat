@@ -22,9 +22,9 @@
 			<header>
 				<h1>Hello, {{.User.Login}}</h1>
 				<details open>
-					<summary role="button" class="secondary">These are your mutuals</summary>
+					<summary role="button" class="secondary">These are your mutual</summary>
 					<ul>
-						{{range .Mutuals}}
+						{{range .Mutual}}
 						<li><a href={{.HTMLURL}}>{{.Username}}</a></li>
 						{{end}}
 					</ul>

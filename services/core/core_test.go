@@ -10,7 +10,7 @@ import (
 type outputFields struct {
 	Followers []MetaFollow
 	Following []MetaFollow
-	chann     chan []MetaFollow
+	channel   chan []MetaFollow
 	wg        sync.WaitGroup
 }
 
@@ -35,8 +35,8 @@ func TestMutuals(t *testing.T) {
 	f := outputFields{inputField.Followers, inputField.Following, make(chan []MetaFollow), sync.WaitGroup{}}
 	f.wg.Add(1)
 	defer f.wg.Wait()
-	go Mutuals(f.Followers, f.Following, f.chann, &f.wg)
-	if got := <-f.chann; !reflect.DeepEqual(got, want) {
+	go Mutuals(f.Followers, f.Following, f.channel, &f.wg)
+	if got := <-f.channel; !reflect.DeepEqual(got, want) {
 		t.Errorf("\nMutuals() = %v\nwant %v", got, want)
 	}
 }
@@ -50,8 +50,8 @@ func TestFollowersYouDontFollow(t *testing.T) {
 	f := outputFields{inputField.Followers, inputField.Following, make(chan []MetaFollow), sync.WaitGroup{}}
 	f.wg.Add(1)
 	defer f.wg.Wait()
-	go IDontFollow(f.Followers, f.Following, f.chann, &f.wg)
-	if got := <-f.chann; !reflect.DeepEqual(got, want) {
+	go IDontFollow(f.Followers, f.Following, f.channel, &f.wg)
+	if got := <-f.channel; !reflect.DeepEqual(got, want) {
 		t.Errorf("\nFollowersYouDontFollow() = %v\nwant %v", got, want)
 	}
 }
@@ -65,8 +65,8 @@ func TestFollowingYouDontFollow(t *testing.T) {
 	}
 	f.wg.Add(1)
 	defer f.wg.Wait()
-	go TheyDontFollow(f.Followers, f.Following, f.chann, &f.wg)
-	if got := <-f.chann; !reflect.DeepEqual(got, want) {
+	go TheyDontFollow(f.Followers, f.Following, f.channel, &f.wg)
+	if got := <-f.channel; !reflect.DeepEqual(got, want) {
 		t.Errorf("\nFollowingYouDontFollow() = %v\nwant %v", got, want)
 	}
 }

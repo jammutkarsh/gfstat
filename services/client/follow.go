@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"log"
 	"sort"
 
 	"github.com/JammUtkarsh/gfstat/services/core"
@@ -10,7 +11,7 @@ import (
 
 const (
 	pageLimit = 100
-	reqLimit  = 5000 -2
+	reqLimit  = 5000 - 2
 )
 
 func GETFollowers(c *github.Client, u github.User, resp github.Response) (followers []core.MetaFollow, err error) {
@@ -20,6 +21,7 @@ func GETFollowers(c *github.Client, u github.User, resp github.Response) (follow
 	for i := 0; i <= resp.LastPage; i++ {
 		follow, res, err := c.Users.ListFollowers(ctx, *u.Login, &github.ListOptions{Page: i, PerPage: pageLimit})
 		if err != nil {
+			log.Println(err)
 			return nil, err
 		}
 
@@ -52,6 +54,7 @@ func GETFollowing(c *github.Client, u github.User, resp github.Response) (follow
 	for i := 0; i <= resp.LastPage; i++ {
 		follow, res, err := c.Users.ListFollowing(ctx, *u.Login, &github.ListOptions{Page: i, PerPage: pageLimit})
 		if err != nil {
+			log.Println(err)
 			return nil, err
 		}
 

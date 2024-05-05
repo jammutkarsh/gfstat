@@ -11,10 +11,12 @@ import (
 	"github.com/google/go-github/github"
 )
 
+// ResultData WARN: Changing name of the variables here directly affects HTML generation.
+// The changes made here should be synchronized with view/*.html files
 type ResultData struct {
 	ClientID       string
 	User           github.User
-	Mutuals        []core.MetaFollow
+	Mutual         []core.MetaFollow
 	IDontFollow    []core.MetaFollow
 	TheyDontFollow []core.MetaFollow
 }
@@ -60,7 +62,7 @@ func result(w http.ResponseWriter, r *http.Request) {
 	accessKeys := client.GetAccessToken(w, r)
 	// bug: when user tries to refresh the page which has the same session token.
 	// But the session token can only be used once.
-	// The github API should return an error if the token is used more than once but it return 200 for every request.
+	// The GitHub API should return an error if the token is used more than once, but it returns 200 for every request.
 	// So in the 2nd refresh, the access token is empty and the user is redirected to the login page.
 	if accessKeys.AccessToken == "" {
 		http.Redirect(w, r, "https://github.com/login/oauth/authorize?scope=user:follow&read:user&client_id="+client.GithubPublicID, http.StatusTemporaryRedirect)
