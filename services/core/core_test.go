@@ -3,15 +3,12 @@ package core
 import (
 	"encoding/json"
 	"reflect"
-	"sync"
 	"testing"
 )
 
 type outputFields struct {
 	Followers []MetaFollow
 	Following []MetaFollow
-	chann     chan []MetaFollow
-	wg        sync.WaitGroup
 }
 
 var inputField struct {
@@ -32,11 +29,8 @@ func TestMutuals(t *testing.T) {
 	if err := json.Unmarshal([]byte(testMutuals), &want); err != nil {
 		t.Fatalf("Error in unmarshalling output: %v", err)
 	}
-	f := outputFields{inputField.Followers, inputField.Following, make(chan []MetaFollow), sync.WaitGroup{}}
-	f.wg.Add(1)
-	defer f.wg.Wait()
-	go Mutuals(f.Followers, f.Following, f.chann, &f.wg)
-	if got := <-f.chann; !reflect.DeepEqual(got, want) {
+	f := outputFields{inputField.Followers, inputField.Following}
+	if got := Mutuals(f.Followers, f.Following); !reflect.DeepEqual(got, want) {
 		t.Errorf("\nMutuals() = %v\nwant %v", got, want)
 	}
 }
@@ -47,11 +41,8 @@ func TestFollowersYouDontFollow(t *testing.T) {
 	if err := json.Unmarshal([]byte(testIDontFollow), &want); err != nil {
 		t.Fatalf("Error in unmarshalling output: %v", err)
 	}
-	f := outputFields{inputField.Followers, inputField.Following, make(chan []MetaFollow), sync.WaitGroup{}}
-	f.wg.Add(1)
-	defer f.wg.Wait()
-	go IDontFollow(f.Followers, f.Following, f.chann, &f.wg)
-	if got := <-f.chann; !reflect.DeepEqual(got, want) {
+	f := outputFields{inputField.Followers, inputField.Following}
+	if got := IDontFollow(f.Followers, f.Following); !reflect.DeepEqual(got, want) {
 		t.Errorf("\nFollowersYouDontFollow() = %v\nwant %v", got, want)
 	}
 }
@@ -59,14 +50,11 @@ func TestFollowersYouDontFollow(t *testing.T) {
 func TestFollowingYouDontFollow(t *testing.T) {
 	t.Parallel()
 	var want []MetaFollow
-	f := outputFields{inputField.Followers, inputField.Following, make(chan []MetaFollow), sync.WaitGroup{}}
+	f := outputFields{inputField.Followers, inputField.Following}
 	if err := json.Unmarshal([]byte(testTheyDontFollow), &want); err != nil {
 		t.Fatalf("Error in unmarshalling output: %v", err)
 	}
-	f.wg.Add(1)
-	defer f.wg.Wait()
-	go TheyDontFollow(f.Followers, f.Following, f.chann, &f.wg)
-	if got := <-f.chann; !reflect.DeepEqual(got, want) {
+	if got := TheyDontFollow(f.Followers, f.Following); !reflect.DeepEqual(got, want) {
 		t.Errorf("\nFollowingYouDontFollow() = %v\nwant %v", got, want)
 	}
 }

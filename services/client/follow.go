@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"sort"
+	"sync"
 
 	"github.com/JammUtkarsh/gfstat/services/core"
 	"github.com/google/go-github/github"
@@ -10,18 +11,26 @@ import (
 
 const (
 	pageLimit = 100
-	reqLimit  = 5000 -2
+	reqLimit  = 5000 - 2
 )
 
 func GETFollowers(c *github.Client, u github.User, resp github.Response) (followers []core.MetaFollow, err error) {
 	if count := *u.Followers + *u.Following; count/pageLimit > reqLimit {
 		return nil, fmt.Errorf("you have too many followers and following: %d", count)
 	}
-	for i := 0; i <= resp.LastPage; i++ {
-		follow, res, err := c.Users.ListFollowers(ctx, *u.Login, &github.ListOptions{Page: i, PerPage: pageLimit})
+	
+	var once sync.Once
+	firstPage, lastPage := 1, 1
+	
+	for firstPage <= lastPage {
+		follow, res, err := c.Users.ListFollowers(ctx, *u.Login, &github.ListOptions{Page: firstPage, PerPage: pageLimit})
 		if err != nil {
 			return nil, err
 		}
+
+		goroutine(&once, func() {
+			firstPage, lastPage = getFirstPage(res), getLastPage(res)
+		})
 
 		defer res.Body.Close()
 
@@ -35,7 +44,7 @@ func GETFollowers(c *github.Client, u github.User, resp github.Response) (follow
 				HTMLURL:  *v.HTMLURL,
 			})
 		}
-
+		firstPage++
 	}
 
 	sort.Slice(followers, func(i, j int) bool {
@@ -49,11 +58,18 @@ func GETFollowing(c *github.Client, u github.User, resp github.Response) (follow
 	if count := *u.Followers + *u.Following; count/pageLimit > reqLimit {
 		return nil, fmt.Errorf("you have too many followers and following: %d", count)
 	}
-	for i := 0; i <= resp.LastPage; i++ {
-		follow, res, err := c.Users.ListFollowing(ctx, *u.Login, &github.ListOptions{Page: i, PerPage: pageLimit})
+	var once sync.Once
+
+	firstPage, lastPage := 1, 1
+	for firstPage <= lastPage {
+		follow, res, err := c.Users.ListFollowing(ctx, *u.Login, &github.ListOptions{Page: firstPage, PerPage: pageLimit})
 		if err != nil {
 			return nil, err
 		}
+
+		goroutine(&once, func() {
+			firstPage, lastPage = getFirstPage(res), getLastPage(res)
+		})
 
 		defer res.Body.Close()
 
@@ -67,7 +83,7 @@ func GETFollowing(c *github.Client, u github.User, resp github.Response) (follow
 				HTMLURL:  *v.HTMLURL,
 			})
 		}
-
+		firstPage++
 	}
 
 	sort.Slice(followings, func(i, j int) bool {
@@ -76,4 +92,22 @@ func GETFollowing(c *github.Client, u github.User, resp github.Response) (follow
 
 	return followings, nil
 
+}
+
+func getLastPage(r *github.Response) int {
+	if r.LastPage == 0 {
+		return 1
+	}
+	return r.LastPage
+}
+
+func getFirstPage(r *github.Response) int {
+	if r.FirstPage == 0 {
+		return 1
+	}
+	return r.FirstPage
+}
+
+func goroutine(once *sync.Once, onceBody func()) {
+	once.Do(onceBody)
 }

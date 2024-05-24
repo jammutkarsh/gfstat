@@ -1,7 +1,5 @@
 package core
 
-import "sync"
-
 type AccountType int
 
 const (
@@ -18,10 +16,9 @@ type MetaFollow struct {
 // Mutuals gives the list of mutuals between followers and following.
 // TC: O(nLogn)
 // SC: O(1)
-func Mutuals(followers, following []MetaFollow, c chan []MetaFollow, wg *sync.WaitGroup) {
-	defer wg.Done()
+func Mutuals(followers, following []MetaFollow) []MetaFollow {
 	if len(followers) == 0 || len(following) == 0 {
-		return
+		return []MetaFollow{}
 	}
 	var results []MetaFollow
 	for _, follower := range followers {
@@ -38,14 +35,13 @@ func Mutuals(followers, following []MetaFollow, c chan []MetaFollow, wg *sync.Wa
 			}
 		}
 	}
-	c <- results
+	return results
 }
 
 // followers - following
 // TC: O(n)
 // SC: O(N)
-func IDontFollow(followers, followings []MetaFollow, c chan []MetaFollow, wg *sync.WaitGroup) {
-	defer wg.Done()
+func IDontFollow(followers, followings []MetaFollow) []MetaFollow {
 	m := make(map[string]MetaFollow)
 	for _, following := range followings {
 		m[following.Username] = following
@@ -57,14 +53,13 @@ func IDontFollow(followers, followings []MetaFollow, c chan []MetaFollow, wg *sy
 			results = append(results, follower)
 		}
 	}
-	c <- results
+	return results
 }
 
 // following - followers
 // TC: O(n)
 // SC: O(N)
-func TheyDontFollow(followers, followings []MetaFollow, c chan []MetaFollow, wg *sync.WaitGroup) {
-	defer wg.Done()
+func TheyDontFollow(followers, followings []MetaFollow) []MetaFollow {
 	m := make(map[string]MetaFollow)
 	for _, follower := range followers {
 		if _, ok := m[follower.Username]; !ok {
@@ -78,5 +73,5 @@ func TheyDontFollow(followers, followings []MetaFollow, c chan []MetaFollow, wg 
 			results = append(results, following)
 		}
 	}
-	c <- results
+	return results
 }

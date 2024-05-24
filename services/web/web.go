@@ -4,7 +4,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"sync"
 
 	"github.com/JammUtkarsh/gfstat/services/client"
 	"github.com/JammUtkarsh/gfstat/services/core"
@@ -73,37 +72,25 @@ func result(w http.ResponseWriter, r *http.Request) {
 	var (
 		followers []core.MetaFollow
 		following []core.MetaFollow
-		wg        sync.WaitGroup
 		err       error
 	)
 
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		followers, err = client.GETFollowers(ghClient, *ghUser, *ghResp)
-	}()
-	go func() {
-		defer wg.Done()
-		following, err = client.GETFollowing(ghClient, *ghUser, *ghResp)
-	}()
-	wg.Wait()
-
+	followers, err = client.GETFollowers(ghClient, *ghUser, *ghResp)
+	if err != nil {
+		renderErrorPage(w, err)
+		return
+	}
+	following, err = client.GETFollowing(ghClient, *ghUser, *ghResp)
 	if err != nil {
 		renderErrorPage(w, err)
 		return
 	}
 
-	resultsCh := make([]chan []core.MetaFollow, 3)
-	for i := range resultsCh {
-		resultsCh[i] = make(chan []core.MetaFollow, 1)
-	}
-	wg.Add(3)
-	go core.Mutuals(followers, following, resultsCh[0], &wg)
-	go core.IDontFollow(followers, following, resultsCh[1], &wg)
-	go core.TheyDontFollow(followers, following, resultsCh[2], &wg)
-	wg.Wait()
+	mutuals := core.Mutuals(followers, following)
+	iDontFollow := core.IDontFollow(followers, following)
+	theyDontFollow := core.TheyDontFollow(followers, following)
 
-	basicPageData := ResultData{client.GithubPublicID, *ghUser, <-resultsCh[0], <-resultsCh[1], <-resultsCh[2]}
+	basicPageData := ResultData{client.GithubPublicID, *ghUser, mutuals, iDontFollow, theyDontFollow}
 	render := template.Must(template.New("basic.html").ParseFiles("./views/basic.html"))
 	if err = render.Execute(w, basicPageData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
