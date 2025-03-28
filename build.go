@@ -34,15 +34,14 @@ func main() {
 		WithWorkdir(workDir).
 		WithExec([]string{"apk", "add", "--no-cache", "git"}).
 		WithExec([]string{"go", "get", "-d", "-v", "./..."}).
-		WithExec([]string{"go", "build", "-o", binPath, "-v", "./..."})
+		WithExec([]string{"go", "build", "-o", binPath, "-v", "."})
 
 	prodImg := client.Container().From("alpine:latest").
 		WithExec([]string{"apk", "add", "--no-cache", "ca-certificates"}).
 		WithFile("/gfstat", golang.File(binPath)).
 		WithDirectory("/views", golang.Directory(workDir+"/views")).
-		WithExposedPort(3639).WithDefaultArgs(dagger.ContainerWithDefaultArgsOpts{
-		Args: []string{"./gfstat"},
-	})
+		WithExposedPort(3639).
+		WithDefaultArgs([]string{"./gfstat"})
 
 	tarImage, err := prodImg.Export(ctx, exportedTar)
 	if err != nil {

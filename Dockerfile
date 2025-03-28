@@ -4,7 +4,7 @@ RUN apk add --no-cache git
 WORKDIR /go/src/gfstat
 COPY . .
 RUN go get -d -v ./...
-RUN go build -o /go/bin/gfstat -v ./...
+RUN go build -o /go/bin/gfstat -v .
 
 # final stage
 FROM alpine:latest
