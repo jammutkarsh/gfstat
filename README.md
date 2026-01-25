@@ -1,7 +1,6 @@
 # gfStat (GitHub Follow Stat)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![GitHub Release](https://img.shields.io/github/release/JammUtkarsh/gfstat.svg?style=flat)
 
 gfStat is a tool for GitHub users that provides insights into your GitHub followers and following. With gfStat, you can easily discover:
 
