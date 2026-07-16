@@ -1,39 +1,52 @@
-# gfStat (GitHub Follow Stat)
+# gfstat — GitHub Follow Stats
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![GitHub Release](https://img.shields.io/github/release/JammUtkarsh/gfstat.svg?style=flat)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-gfStat is a tool for GitHub users that provides insights into your GitHub followers and following. With gfStat, you can easily discover:
+Know your GitHub follow stats: mutuals, who doesn't follow you back, whom you don't follow back — with follow/unfollow right from the app.
 
-- **Mutual followers**: See who follows you and whom you follow back.
-- **Followers you don't follow**: Find out who follows you, but you don't follow back.
-- **Following that don't follow you**: Identify GitHub users you follow, but they don't follow you in return.
+## Tech
 
-## Why gfStat?
-
-It's a side project to learn a bunch of new technologies and tools and practice writing. I am using Go again because I've been doing data structures and algorithms for a long enough time now which made me unable to write effective Go code.
-
-## Tech Involved
-
-- About 99% of the project is built in [Go](https://go.dev/) the rest of it is simple HTML templating.
-- The only external dependency that I have used is [GitHub's Go SDK](https://pkg.go.dev/github.com/google/go-github/v56#section-readme), the rest of application is built standard library.
+SvelteKit (TypeScript, server-side), Cloudflare Pages, [utc-ds](https://github.com/jammutkarsh/design-system) design system. Plain `fetch` against GitHub REST API.
 
 ## Local Dev
 
-To run and debug this program locally:
+```bash
+npm install
+cp .env.example .env   # edit with your OAuth app credentials
+npm run dev
+```
 
-Prepare a `.env` file
+### Required env vars
 
 ```env
-GH_BASIC_CLIENT_ID=1234abc
-GH_BASIC_SECRET_ID=1234xyz
+GITHUB_CLIENT_ID=your_oauth_client_id
+GITHUB_CLIENT_SECRET=your_oauth_client_secret
 ```
 
-These two values which you get from [New OAuth App](https://github.com/settings/developers). Then:
+### OAuth App Setup
+
+1. Register a new OAuth app at https://github.com/settings/developers
+2. Homepage URL: `http://localhost:5173` (dev)
+3. Authorization callback URL: `http://localhost:5173/auth/callback`
+4. Copy Client ID and Secret to `.env`
+
+## Deploy
 
 ```bash
-export $(cat .env | xargs) # to set env vars from .env
-go run . # you are up and running.
+npm run build
+wrangler pages dev   # smoke test
+wrangler pages deploy .svelte-kit/cloudflare
 ```
 
-[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=93388f4a1ca0&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
+Prerequisites: Cloudflare KV namespace named `SESSIONS` (update `id` in `wrangler.toml`). Set secrets in Cloudflare dashboard: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`.
+
+Update OAuth app callback URL to `https://your-domain.pages.dev/auth/callback`.
+
+## Commands
+
+| Command | What |
+|---------|------|
+| `npm run dev` | Dev server |
+| `npm run build` | Production build |
+| `npm test` | Vitest |
+| `npm run check` | Type-check |

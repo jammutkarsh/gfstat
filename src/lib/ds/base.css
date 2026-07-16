@@ -1,0 +1,625 @@
+/* ============================================================
+   utc-ds — Base Styles
+   ============================================================
+
+   PURPOSE
+   -------
+   This file styles every semantic HTML element that a typical
+   markdown-to-HTML converter produces.  No classes are needed
+   for basic, content-first rendering — just write HTML and it
+   works.  Think of it as a "classless" stylesheet.
+
+   Covers: headings, paragraphs, links, lists (ul/ol/dl),
+   blockquotes, horizontal rules, inline & block code, tables,
+   images & figures, inline semantics (strong, em, mark, kbd,
+   abbr, del, sup, sub, small), details/summary, and more.
+
+   A handful of optional classes are provided for enhanced
+   variants that can't be expressed through element selectors
+   alone:
+     .lead          — larger intro paragraph
+     .dot-fill      — dotted-line horizontal rule
+     .ascii-hr      — repeated ─ character horizontal rule
+     .table-mono    — monospace table cells
+     .hr-label      — labeled divider with centered text
+     .token-*       — syntax highlighting token classes
+
+    Blockquote cite elements are styled as mono attributions.
+
+   DEPENDENCIES
+   ------------
+   Requires tokens.css to be loaded first (provides all
+   --ds-* custom properties).
+
+   DESIGN PHILOSOPHY
+   -----------------
+   Inspired by PlanetScale's dark, terminal-flavored aesthetic
+   and charmbracelet/glow's beautifully rendered markdown.
+   Dashed borders, monospace accents, bracket-wrapped tags,
+   pipe separators, arrow links — all part of the vocabulary.
+
+   ============================================================ */
+
+
+/* ────────────────────────────────────────────────────────────
+   1. CSS RESET (minimal)
+   ──────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove default list styles — we re-apply them in §6 */
+ul,
+ol {
+  list-style: none;
+}
+
+/* Remove default fieldset / legend chrome */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   2. BASE / ROOT
+   ──────────────────────────────────────────────────────────── */
+
+html {
+  /* Fluid typography: 16px base, scales up on screens >1200px, maxes at 24px */
+  font-size: clamp(100%, 1vw + 0.3rem, 150%);
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--ds-font-sans);
+  font-size: var(--ds-text-base);
+  line-height: var(--ds-leading);
+  color: var(--ds-text-primary);
+  background: var(--ds-bg-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--ds-primary);
+  color: #ffffff;
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   3. HEADINGS (h1 – h6)
+   ──────────────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--ds-weight-medium);
+  line-height: var(--ds-leading-tight);
+  color: var(--ds-text-primary);
+}
+
+/* Tight tracking for large headings */
+h1, h2, h3 {
+  letter-spacing: var(--ds-tracking-tight);
+}
+
+h4, h5, h6 {
+  letter-spacing: var(--ds-tracking-normal);
+}
+
+/* ── h1 ── */
+h1 {
+  font-size: var(--ds-text-5xl);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  margin-top: 0;
+  margin-bottom: var(--ds-space-6);
+}
+
+/* ── h2 — dashed bottom border, like glow renders h2 ── */
+h2 {
+  font-size: var(--ds-text-3xl);
+  font-weight: 300;
+  margin-top: var(--ds-space-12);
+  margin-bottom: var(--ds-space-4);
+  padding-bottom: var(--ds-space-2);
+  border-bottom: 1px dashed var(--ds-border-strong);
+}
+
+/* ── h3 ── */
+h3 {
+  font-size: var(--ds-text-2xl);
+  margin-top: var(--ds-space-8);
+  margin-bottom: var(--ds-space-3);
+}
+
+/* ── h4 ── */
+h4 {
+  font-size: var(--ds-text-xl);
+  margin-top: var(--ds-space-6);
+  margin-bottom: var(--ds-space-2);
+}
+
+/* ── h5 ── */
+h5 {
+  font-size: var(--ds-text-lg);
+  margin-top: var(--ds-space-6);
+  margin-bottom: var(--ds-space-2);
+}
+
+/* ── h6 — uppercase mono label ── */
+h6 {
+  font-size: var(--ds-text-sm);
+  font-family: var(--ds-font-mono);
+  margin-top: var(--ds-space-4);
+  margin-bottom: var(--ds-space-2);
+  color: var(--ds-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
+}
+
+/* Heading prefixes removed — clean headings without # symbols */
+
+
+/* ────────────────────────────────────────────────────────────
+   4. PARAGRAPHS
+   ──────────────────────────────────────────────────────────── */
+
+p {
+  margin-bottom: var(--ds-space-4);
+}
+
+/* Larger intro / lede paragraph */
+.lead {
+  font-size: var(--ds-text-xl);
+  color: var(--ds-text-primary);
+  line-height: var(--ds-leading);
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   5. LINKS (a)
+   ──────────────────────────────────────────────────────────── */
+
+a {
+  color: var(--ds-text-link);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ds-text-link) 40%, transparent);
+  text-underline-offset: 3px;
+  transition:
+    color var(--ds-transition),
+    text-decoration-color var(--ds-transition);
+}
+
+a:hover {
+  color: var(--ds-text-link-hover);
+  text-decoration-color: var(--ds-text-link-hover);
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   6. LISTS (ul, ol, dl)
+   ──────────────────────────────────────────────────────────── */
+
+ul,
+ol {
+  padding-left: var(--ds-space-6);
+  margin-bottom: var(--ds-space-4);
+}
+
+li {
+  margin-bottom: var(--ds-space-1);
+}
+
+/* Terminal-style triangle marker for unordered lists */
+ul {
+  list-style-type: '▸ ';
+}
+
+/* Decimal markers in monospace for ordered lists */
+ol {
+  list-style-type: decimal;
+}
+
+ol li::marker {
+  font-family: var(--ds-font-mono);
+}
+
+/* Nested lists: tighten up */
+ul ul,
+ol ol,
+ul ol,
+ol ul {
+  margin-top: var(--ds-space-1);
+  margin-bottom: 0;
+}
+
+/* ── Definition lists ── */
+dl {
+  margin-bottom: var(--ds-space-4);
+}
+
+dt {
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-text-primary);
+  margin-top: var(--ds-space-3);
+}
+
+dd {
+  margin-left: var(--ds-space-4);
+  padding-left: var(--ds-space-4);
+  border-left: 2px solid var(--ds-border);
+  color: var(--ds-text-secondary);
+  margin-bottom: var(--ds-space-2);
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   7. BLOCKQUOTES
+   ──────────────────────────────────────────────────────────── */
+
+blockquote {
+  border-left: 3px solid var(--ds-primary);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  margin: var(--ds-space-4) 0;
+  background: var(--ds-bg-secondary);
+  color: var(--ds-text-secondary);
+  border-radius: 0 var(--ds-radius) var(--ds-radius) 0;
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Nested blockquotes: extra indent */
+blockquote blockquote {
+  margin-left: var(--ds-space-4);
+  border-left-color: var(--ds-border-strong);
+}
+
+/* Citation / attribution inside blockquote */
+blockquote cite {
+  display: block;
+  margin-top: var(--ds-space-3);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-text-tertiary);
+  font-style: normal;
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   8. HORIZONTAL RULES (hr)
+   ──────────────────────────────────────────────────────────── */
+
+hr {
+  border: none;
+  border-top: 1px dashed var(--ds-border-strong);
+  margin: var(--ds-space-8) 0;
+}
+
+/* Dot-fill variant — PlanetScale-style dotted line */
+hr.dot-fill {
+  border: none;
+  height: 2px;
+  background-image: radial-gradient(
+    circle,
+    var(--ds-text-tertiary) 1px,
+    transparent 1px
+  );
+  background-size: 8px 2px;
+}
+
+/* ASCII box-drawing line variant */
+hr.ascii-hr {
+  border: none;
+  height: auto;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--ds-text-tertiary);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  line-height: 1;
+  display: block;
+}
+
+hr.ascii-hr::before {
+  content: '────────────────────────────────────────────────────────────────────────────────';
+  display: block;
+}
+
+/* Labeled divider — centered text with lines on each side */
+.hr-label {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-4);
+  margin: var(--ds-space-8) 0;
+  color: var(--ds-text-tertiary);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hr-label::before,
+.hr-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ds-border);
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   9. CODE
+   ──────────────────────────────────────────────────────────── */
+
+/* ── Inline code (code NOT inside pre) ── */
+code {
+  font-family: var(--ds-font-mono);
+  font-size: 0.9em;
+  background: var(--ds-bg-code);
+  padding: 2px 6px;
+  border-radius: var(--ds-radius-sm);
+  border: 1px solid var(--ds-border);
+  color: var(--ds-primary-hover);
+}
+
+/* ── Code blocks (pre) ── */
+pre {
+  background: var(--ds-bg-code);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius);
+  padding: var(--ds-space-4);
+  overflow-x: auto;
+  margin: var(--ds-space-4) 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  tab-size: 2;
+  -moz-tab-size: 2;
+}
+
+/* Reset inline code styles when inside a pre block */
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  border-radius: 0;
+}
+
+/* ── Syntax highlighting classes for code blocks ── */
+.token-keyword   { color: var(--ds-secondary); }        /* light blue — keywords */
+.token-function  { color: var(--ds-primary); }           /* orange — function names */
+.token-string    { color: var(--ds-warning); }           /* yellow — strings */
+.token-comment   { color: var(--ds-text-tertiary); }     /* dim — comments */
+.token-type      { color: var(--ds-secondary); }         /* light blue — types */
+.token-number    { color: var(--ds-purple); }             /* purple — numbers */
+.token-operator  { color: var(--ds-text-secondary); }    /* gray — operators */
+.token-variable  { color: var(--ds-pink, #ffd7ff); }     /* pink — variables */
+.token-builtin   { color: var(--ds-success); }           /* green — builtins */
+
+
+/* ────────────────────────────────────────────────────────────
+   10. TABLES
+   ──────────────────────────────────────────────────────────── */
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--ds-space-4) 0;
+  font-size: var(--ds-text-sm);
+}
+
+th {
+  font-weight: var(--ds-weight-semibold);
+  text-align: left;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border-bottom: 2px solid var(--ds-border-strong);
+  color: var(--ds-text-primary);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
+  white-space: nowrap;
+}
+
+td {
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border-bottom: 1px solid var(--ds-border);
+  color: var(--ds-text-secondary);
+  white-space: nowrap;
+}
+
+tr:hover {
+  background: var(--ds-bg-secondary);
+}
+
+/* Monospace table variant — apply .table-mono to <table> */
+.table-mono td {
+  font-family: var(--ds-font-mono);
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   11. IMAGES & FIGURES
+   ──────────────────────────────────────────────────────────── */
+
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--ds-radius);
+  display: block;
+}
+
+figure {
+  margin: var(--ds-space-6) 0;
+}
+
+figcaption {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-secondary);
+  margin-top: var(--ds-space-2);
+  text-align: center;
+  font-family: var(--ds-font-mono);
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   12. INLINE SEMANTIC ELEMENTS
+   ──────────────────────────────────────────────────────────── */
+
+/* Bold / strong — ensure it's bright in dark mode */
+strong,
+b {
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-text-primary);
+}
+
+/* Italic */
+em,
+i {
+  font-style: italic;
+}
+
+/* Strikethrough */
+del,
+s {
+  text-decoration: line-through;
+  color: var(--ds-text-tertiary);
+  text-decoration-color: var(--ds-danger);
+}
+
+/* Highlight / mark */
+mark {
+  background: var(--ds-primary-muted);
+  color: var(--ds-primary);
+  padding: 1px 4px;
+  border-radius: var(--ds-radius-sm);
+}
+
+/* Keyboard key — styled like a physical keycap */
+kbd {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  background: var(--ds-bg-tertiary);
+  border: 1px solid var(--ds-border-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--ds-radius-sm);
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+/* Abbreviation with tooltip */
+abbr[title] {
+  text-decoration: underline dotted var(--ds-text-tertiary);
+  cursor: help;
+}
+
+/* Superscript / subscript */
+sup,
+sub {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+/* Small text */
+small {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-secondary);
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   13. DETAILS / SUMMARY
+   ──────────────────────────────────────────────────────────── */
+
+details {
+  margin: var(--ds-space-4) 0;
+  border: 1px dashed var(--ds-border-strong);
+  border-radius: var(--ds-radius);
+  padding: 0 var(--ds-space-4);
+}
+details[open] {
+  padding-bottom: var(--ds-space-4);
+}
+
+summary {
+  margin: 0 calc(-1 * var(--ds-space-4));
+  padding: var(--ds-space-3) var(--ds-space-4);
+  cursor: pointer;
+  font-weight: var(--ds-weight-medium);
+  font-family: var(--ds-font-mono);
+  list-style: none;
+}
+
+/* Remove default disclosure marker */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Custom triangle marker — closed state */
+summary::before {
+  content: '▸ ';
+  color: var(--ds-text-tertiary);
+}
+
+/* Custom triangle marker — open state */
+details[open] > summary::before {
+  content: '▾ ';
+}
+
+/* Add bottom border to summary when open for visual separation */
+details[open] > summary {
+  border-bottom: 1px dashed var(--ds-border);
+  margin-bottom: var(--ds-space-3);
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   14. MISC
+   ──────────────────────────────────────────────────────────── */
+
+/* Address should not be italic by default */
+address {
+  font-style: normal;
+}
+
+/* Tighter spacing between paragraphs and their lists */
+p + ul,
+p + ol {
+  margin-top: calc(-1 * var(--ds-space-2));
+}
