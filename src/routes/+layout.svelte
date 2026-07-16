@@ -5,6 +5,7 @@
 	let { data, children }: LayoutProps = $props();
 
 	let stars = $state<number | null>(null);
+	let menuOpen = $state(false);
 
 	// repo star count — anonymous, cached 1h; a nice-to-have, never blocks render
 	$effect(() => {
@@ -39,16 +40,36 @@
 	const fmt = new Intl.NumberFormat();
 </script>
 
-<nav class="nav">
+<nav class="nav" class:open={menuOpen}>
 	<div class="nav-inner">
 		<a href="/" class="nav-brand"><span class="nav-prefix">~/</span>jammutkarsh/gfstat</a>
-		<div class="nav-links">
-			<a href="https://github.com/JammUtkarsh/gfstat" class="nav-link" target="_blank" rel="noopener">
+		<button
+			class="hamburger"
+			aria-label="toggle menu"
+			aria-expanded={menuOpen}
+			onclick={() => (menuOpen = !menuOpen)}
+		>
+			<span></span><span></span><span></span>
+		</button>
+		<div class="nav-links" class:open={menuOpen}>
+			<a
+				href="https://github.com/JammUtkarsh/gfstat"
+				class="nav-link"
+				target="_blank"
+				rel="noopener"
+				onclick={() => (menuOpen = false)}
+			>
 				★ github{#if stars !== null}<span class="star-count">{fmt.format(stars)}</span>{/if}
 			</a>
 			{#if data.loggedIn}
 				<span class="nav-sep">|</span>
-				<a href="/logout" class="nav-link" data-sveltekit-preload-data="off" data-sveltekit-reload>logout</a>
+				<a
+					href="/logout"
+					class="nav-link"
+					data-sveltekit-preload-data="off"
+					data-sveltekit-reload
+					onclick={() => (menuOpen = false)}>logout</a
+				>
 			{/if}
 		</div>
 	</div>
