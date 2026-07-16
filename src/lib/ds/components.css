@@ -1,0 +1,1035 @@
+/* ==========================================================================
+ * utc-ds | components.css
+ * ==========================================================================
+ *
+ * Reusable component classes for the utc-ds design system.
+ *
+ * Inspired by PlanetScale's website and charmbracelet/glow terminal
+ * markdown renderer. Every value references a --ds-* design token defined
+ * in tokens.css — no raw colours, sizes, or font stacks appear here.
+ *
+ * Components included:
+ *   1.  Container & Prose Container
+ *   2.  Navigation (.nav)
+ *   3.  Hamburger Menu (.hamburger)
+ *   4.  Mobile Menu (.nav-links.open)
+ *   5.  Buttons (.btn, .btn-primary, .btn-ghost, .btn-sm)
+ *   6.  Cards (.card, .card-grid)
+ *   7.  Badges / Tags (.badge + colour variants)
+ *   8.  Callouts / Alerts (.callout + type variants)
+ *   9.  Terminal Block (.terminal)
+ *  10.  ASCII Diagram (.ascii)
+ *  11.  Footer (.footer)
+ *  12.  Metadata Line (.meta)
+ *  13.  Utility Classes
+ *  14.  Responsive Breakpoints
+ *
+ * Zero animations beyond CSS transitions on hover.
+ * ======================================================================== */
+
+
+/* --------------------------------------------------------------------------
+ * 1. Container
+ * ------------------------------------------------------------------------ */
+
+.container {
+  max-width: 92vw;
+  margin-inline: auto;
+  padding-inline: var(--ds-space-4);
+  width: 100%;
+}
+
+.container-prose {
+  max-width: var(--ds-content-width);
+  margin-inline: auto;
+  padding-inline: var(--ds-space-4);
+  width: 100%;
+}
+
+
+/* --------------------------------------------------------------------------
+ * 2. Navigation
+ *
+ * PlanetScale-style sticky nav with pipe-separated links.
+ * ------------------------------------------------------------------------ */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--ds-bg-secondary);
+  border-bottom: 1px solid var(--ds-border);
+}
+
+.nav-inner {
+  max-width: 92vw;
+  margin-inline: auto;
+  padding-inline: var(--ds-space-4);
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 3.5rem;
+  position: relative;
+}
+
+.nav-brand {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-text-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.nav-brand .nav-prefix {
+  color: var(--ds-primary);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  font-weight: var(--ds-weight-semibold);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-primary);
+  text-decoration: none;
+  padding: var(--ds-space-1) var(--ds-space-2);
+  transition: color var(--ds-transition);
+}
+
+.nav-link:hover {
+  color: var(--ds-primary);
+}
+
+/* Pipe | separator between nav links */
+.nav-sep {
+  color: var(--ds-text-tertiary);
+  padding: 0 var(--ds-space-1);
+  user-select: none;
+  font-family: var(--ds-font-mono);
+}
+
+
+/* --------------------------------------------------------------------------
+ * 2b. Breadcrumb (terminal-style)
+ *
+ * Path-like breadcrumb starting with ~/ prefix.
+ * Example: ~/projects/utc-ds/components
+ * ------------------------------------------------------------------------ */
+
+.breadcrumb {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: var(--ds-space-2) 0;
+}
+
+.breadcrumb a {
+  color: var(--ds-text-secondary);
+  text-decoration: none;
+  transition: color var(--ds-transition);
+}
+
+.breadcrumb a:hover {
+  color: var(--ds-primary);
+}
+
+.breadcrumb .bc-sep {
+  color: var(--ds-text-tertiary);
+  padding: 0 2px;
+  user-select: none;
+}
+
+.breadcrumb .bc-home {
+  color: var(--ds-primary);
+}
+
+.breadcrumb .bc-current {
+  color: var(--ds-text-primary);
+}
+
+
+/* --------------------------------------------------------------------------
+ * 3. Hamburger Menu
+ *
+ * Pixel-art-style CSS-only hamburger icon. Three crisp 2 px bars inside
+ * a small bordered square. Hidden on desktop, visible at ≤ 768 px.
+ * ------------------------------------------------------------------------ */
+
+.hamburger {
+  display: none; /* Hidden on desktop */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-sm);
+  padding: var(--ds-space-1);
+  gap: 3px;
+}
+
+.hamburger span {
+  display: block;
+  width: 14px;
+  height: 2px;
+  background: var(--ds-text-primary);
+  transition: transform var(--ds-transition), opacity var(--ds-transition);
+  /* Crisp, pixel-like bars — no border-radius */
+  border-radius: 0;
+}
+
+/* Open-state: first bar rotates +45°, middle bar hides, last bar rotates -45° */
+.nav.open .hamburger span:nth-child(1) {
+  transform: translateY(5px) rotate(45deg);
+}
+
+.nav.open .hamburger span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav.open .hamburger span:nth-child(3) {
+  transform: translateY(-5px) rotate(-45deg);
+}
+
+
+/* --------------------------------------------------------------------------
+ * 4. Mobile Menu
+ *
+ * When the nav is toggled open the links drop down in a terminal-style
+ * dashed-border container. Each link gets a `> ` prompt prefix.
+ * Positioned on `.nav` (not `.nav-inner`) so it spans full viewport width.
+ * ------------------------------------------------------------------------ */
+
+
+.nav-links.open {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--ds-bg-secondary);
+  border: 1px dashed var(--ds-border-strong);
+  border-top: none;
+  padding: var(--ds-space-3);
+  gap: var(--ds-space-1);
+  z-index: 100;
+}
+
+/* Hide pipe separators in mobile dropdown */
+.nav-links.open .nav-sep {
+  display: none;
+}
+
+.nav-links.open .nav-link {
+  display: block;
+  padding: var(--ds-space-2) var(--ds-space-3);
+}
+
+/* Terminal prompt prefix */
+.nav-links.open .nav-link::before {
+  content: '> ';
+  color: var(--ds-text-tertiary);
+  font-family: var(--ds-font-mono);
+}
+
+
+/* --------------------------------------------------------------------------
+ * 5. Buttons
+ *
+ * Monospace, token-driven buttons. Default is a ghost-outlined style;
+ * .btn-primary fills with accent colour; .btn-ghost is borderless.
+ * ------------------------------------------------------------------------ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  border-radius: var(--ds-radius);
+  border: 1px solid var(--ds-border-strong);
+  background: transparent;
+  color: var(--ds-text-primary);
+  cursor: pointer;
+  transition: all var(--ds-transition);
+  text-decoration: none;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  border-color: var(--ds-primary);
+  color: var(--ds-primary);
+}
+
+/* Primary — filled accent button */
+.btn-primary {
+  background: var(--ds-primary);
+  color: #fff;
+  border-color: var(--ds-primary);
+}
+
+.btn-primary:hover {
+  background: var(--ds-primary-hover);
+  border-color: var(--ds-primary-hover);
+  color: #fff;
+}
+
+/* Ghost — borderless, minimal */
+.btn-ghost {
+  border: none;
+  color: var(--ds-text-link);
+  padding: var(--ds-space-1) var(--ds-space-2);
+}
+
+.btn-ghost:hover {
+  background: var(--ds-primary-muted);
+  color: var(--ds-primary-hover);
+}
+
+/* Small size modifier */
+.btn-sm {
+  padding: var(--ds-space-1) var(--ds-space-3);
+  font-size: var(--ds-text-xs);
+}
+
+
+/* --------------------------------------------------------------------------
+ * 6. Cards
+ *
+ * Subtle border with raised background. Includes title, body, and footer
+ * areas. Variants: card-raised, card-accent, card-image.
+ * ------------------------------------------------------------------------ */
+
+.card {
+  background: transparent;
+  border: 1px dashed var(--ds-border-strong);
+  border-radius: var(--ds-radius);
+  padding: var(--ds-space-4);
+  transition: all var(--ds-transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  border-color: var(--ds-primary);
+  background: var(--ds-bg-secondary);
+}
+
+.card h3,
+.card h4 {
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-primary);
+  margin-top: 0;
+  margin-bottom: var(--ds-space-2);
+}
+
+.card p {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-secondary);
+  line-height: 1.65;
+  margin-bottom: var(--ds-space-2);
+}
+
+.card-footer {
+  margin-top: auto;
+  padding-top: var(--ds-space-4);
+  border-top: 1px dashed var(--ds-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Ensure a minimum gap before the footer when cards aren't stretched */
+.card > *:has(+ .card-footer) {
+  margin-bottom: var(--ds-space-4);
+}
+
+/* Raised variant — slightly lighter bg */
+.card-raised {
+  background: var(--ds-bg-tertiary);
+}
+
+/* Accent variant — same layout, different border color to stand out */
+.card-accent {
+  border-color: var(--ds-primary-muted);
+}
+
+.card-accent:hover {
+  border-color: var(--ds-primary);
+  background: var(--ds-bg-secondary);
+}
+
+/* Image card layout — internal flex wrapper for emoji and content */
+.card-image-layout {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-6);
+}
+
+/* Pixel art emoji — icon square on the left */
+.card-pixel-placeholder {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  background: var(--ds-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  border-radius: var(--ds-radius);
+  border: 1px dashed var(--ds-border);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.card-image-layout .card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Tighter gap before footer inside image-layout cards */
+.card-image-layout + .card-footer {
+  padding-top: var(--ds-space-3);
+  margin-top: var(--ds-space-3);
+}
+
+.card:has(.card-image-layout) > *:has(+ .card-footer) {
+  margin-bottom: 0;
+}
+
+/* Blog Post Card — fully redirectable */
+.card-blog {
+  position: relative;
+}
+
+.card-blog h4 a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Ensure interactive elements are clickable if clicked directly */
+.card-blog .btn,
+.card-blog .badge,
+.card-blog a:not(h4 a) {
+  position: relative;
+  z-index: 2;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--ds-space-4);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--ds-space-4);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--ds-space-4);
+}
+
+
+/* --------------------------------------------------------------------------
+ * 7. Badges & Tags
+ *
+ * Bracket-wrapped labels: [Engineering], [Product], etc.
+ * Colour variants match the semantic palette.
+ * ------------------------------------------------------------------------ */
+
+/* Card Tags Container */
+.card-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+}
+
+.badge {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-medium);
+  padding: 1px var(--ds-space-1);
+  border-radius: var(--ds-radius-sm);
+  white-space: nowrap;
+  transition: background var(--ds-transition);
+}
+
+/* Bracket wrappers */
+.badge::before {
+  content: '[';
+  color: var(--ds-text-tertiary);
+}
+
+.badge::after {
+  content: ']';
+  color: var(--ds-text-tertiary);
+}
+
+/* Colour variants */
+.badge-primary       { color: var(--ds-primary); }
+.badge-primary:hover { background: var(--ds-primary-muted); }
+
+.badge-success       { color: var(--ds-success); }
+.badge-success:hover { background: var(--ds-success-muted); }
+
+.badge-info          { color: var(--ds-info); }
+.badge-info:hover    { background: var(--ds-info-muted); }
+
+.badge-warning       { color: var(--ds-warning); }
+.badge-warning:hover { background: var(--ds-warning-muted); }
+
+.badge-danger        { color: var(--ds-danger); }
+.badge-danger:hover  { background: var(--ds-danger-muted); }
+
+.badge-purple        { color: var(--ds-purple); }
+.badge-purple:hover  { background: var(--ds-purple-muted); }
+
+
+/* --------------------------------------------------------------------------
+ * 8. Callouts / Alerts
+ *
+ * GitHub-style alerts with a 3 px left accent border.
+ * Title line is uppercase mono, preceded by a symbol.
+ * ------------------------------------------------------------------------ */
+
+.callout {
+  border-left: 3px solid var(--ds-border-strong);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  margin: var(--ds-space-4) 0;
+  background: var(--ds-bg-secondary);
+  border-radius: 0 var(--ds-radius) var(--ds-radius) 0;
+  font-size: var(--ds-text-sm);
+}
+
+.callout-title {
+  font-weight: var(--ds-weight-semibold);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
+  margin-bottom: var(--ds-space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
+/* Note — blue / info */
+.callout-note                { border-left-color: color-mix(in oklch, var(--ds-info) 50%, transparent); }
+.callout-note .callout-title { color: var(--ds-info); }
+.callout-note .callout-title::before { content: 'ℹ '; }
+
+/* Tip — green / success */
+.callout-tip                 { border-left-color: color-mix(in oklch, var(--ds-success) 50%, transparent); }
+.callout-tip .callout-title  { color: var(--ds-success); }
+.callout-tip .callout-title::before  { content: '✦ '; }
+
+/* Warning — yellow / warning */
+.callout-warning                { border-left-color: color-mix(in oklch, var(--ds-warning) 50%, transparent); }
+.callout-warning .callout-title { color: var(--ds-warning); }
+.callout-warning .callout-title::before { content: '⚠ '; }
+
+/* Caution — red / danger */
+.callout-caution                { border-left-color: color-mix(in oklch, var(--ds-danger) 50%, transparent); }
+.callout-caution .callout-title { color: var(--ds-danger); }
+.callout-caution .callout-title::before { content: '✕ '; }
+
+
+/* --------------------------------------------------------------------------
+ * 9. Terminal Block
+ *
+ * Faux terminal window with a header (three pixel-square dots + optional
+ * title) and a scrollable mono body. Prompt lines get a green `$ `.
+ * ------------------------------------------------------------------------ */
+
+.terminal {
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
+  margin: var(--ds-space-6) 0;
+  background: var(--ds-bg-code);
+}
+
+.terminal-header {
+  background: var(--ds-bg-tertiary);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  border-bottom: 1px solid var(--ds-border);
+}
+
+/* Three pixel-style dots — square, not round */
+.terminal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 0;
+  display: inline-block;
+}
+
+.terminal-dot:nth-child(1) { background: var(--ds-danger); }
+.terminal-dot:nth-child(2) { background: var(--ds-warning); }
+.terminal-dot:nth-child(3) { background: var(--ds-success); }
+
+.terminal-title {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-text-secondary);
+  margin-left: var(--ds-space-2);
+}
+
+.terminal-body {
+  padding: var(--ds-space-4);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  color: var(--ds-text-primary);
+  overflow-x: auto;
+}
+
+/* Prompt line: green `$ ` prefix */
+.terminal-body .prompt::before {
+  content: '$ ';
+  color: var(--ds-success);
+}
+
+.terminal-body pre.output {
+  color: var(--ds-text-secondary);
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+}
+
+/* Copy button — appears on hover over terminal-body sections */
+.terminal-cmd {
+  position: relative;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border-radius: var(--ds-radius-sm);
+  cursor: pointer;
+  transition: background var(--ds-transition);
+}
+
+.terminal-cmd:hover {
+  background: var(--ds-bg-elevated);
+}
+
+.copy-btn {
+  position: absolute;
+  opacity: 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-text-tertiary);
+  background: var(--ds-bg-tertiary);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-sm);
+  padding: 2px var(--ds-space-2);
+  cursor: pointer;
+  transition: all var(--ds-transition);
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  color: var(--ds-primary);
+  border-color: var(--ds-primary);
+}
+
+.copy-btn.copied {
+  color: var(--ds-success);
+  border-color: var(--ds-success);
+}
+
+.terminal-cmd .copy-btn {
+  top: var(--ds-space-2);
+  right: var(--ds-space-2);
+}
+
+.code-block-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.code-header {
+  padding: var(--ds-space-2) var(--ds-space-4);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-text-secondary);
+  background: var(--ds-bg-tertiary);
+  border: 1px dashed var(--ds-border-strong);
+  border-bottom: none;
+  border-radius: var(--ds-radius) var(--ds-radius) 0 0;
+  margin-bottom: 0;
+}
+
+.code-header + pre {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin-top: 0;
+}
+
+.code-block-wrapper .copy-btn {
+  top: var(--ds-space-2);
+  right: var(--ds-space-2);
+}
+
+.terminal-cmd:hover .copy-btn,
+.code-block-wrapper:hover .copy-btn {
+  opacity: 1;
+}
+
+
+/* --------------------------------------------------------------------------
+ * 10. ASCII Diagram
+ *
+ * Pre-formatted monospace block with dashed border for displaying
+ * ASCII art, diagrams, and box-drawing layouts.
+ * ------------------------------------------------------------------------ */
+
+.ascii {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  line-height: 1.4;
+  background: var(--ds-bg-secondary);
+  border: 1px dashed var(--ds-border-strong);
+  border-radius: var(--ds-radius);
+  padding: var(--ds-space-4);
+  margin: var(--ds-space-4) 0;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--ds-text-secondary);
+}
+
+.ascii .highlight {
+  color: var(--ds-primary);
+}
+
+.ascii .dim {
+  color: var(--ds-text-tertiary);
+}
+
+
+/* --------------------------------------------------------------------------
+ * 11. Footer
+ *
+ * Multi-column PlanetScale-style footer. Columns sit inside a dashed
+ * border grid with collapsed margins. Links use a `›` prefix and
+ * hanging-indent for multi-line wrapping.
+ * ------------------------------------------------------------------------ */
+
+.footer {
+  margin-top: var(--ds-space-16);
+  padding-top: var(--ds-space-8);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0;
+}
+
+.footer-col {
+  border: 1px dashed var(--ds-border-strong);
+  /* Collapse adjacent borders so they don't double up */
+  margin: -0.5px;
+  padding: var(--ds-space-4);
+}
+
+.footer-col h3 {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  margin-bottom: var(--ds-space-3);
+  margin-top: 0;
+  border: none;
+  padding: 0;
+  color: var(--ds-text-primary);
+}
+
+.footer-col a {
+  display: block;
+  color: var(--ds-text-link);
+  text-decoration: none;
+  padding-left: 1ch;
+  text-indent: -1ch;
+  line-height: 1.8;
+  font-size: var(--ds-text-sm);
+}
+
+.footer-col a:hover {
+  color: var(--ds-text-primary);
+}
+
+.footer-col a::before {
+  content: '› ';
+  color: var(--ds-text-tertiary);
+}
+
+.footer-bottom {
+  border: 1px dashed var(--ds-border-strong);
+  margin: -0.5px;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-secondary);
+}
+
+.footer-bottom a {
+  color: var(--ds-text-link);
+  text-decoration: none;
+}
+
+.footer-bottom a:hover {
+  color: var(--ds-text-primary);
+}
+
+
+/* --------------------------------------------------------------------------
+ * 12. Metadata Line
+ *
+ * Blog / post metadata: Author | Date | Tags, with @handle support.
+ * ------------------------------------------------------------------------ */
+
+.meta {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-secondary);
+  font-family: var(--ds-font-mono);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-1);
+}
+
+.meta a {
+  color: var(--ds-text-primary);
+  text-decoration: none;
+}
+
+.meta a:hover {
+  color: var(--ds-primary);
+}
+
+.meta .handle {
+  color: var(--ds-text-tertiary);
+}
+
+.meta .handle:hover {
+  color: var(--ds-info);
+  background: var(--ds-info-muted);
+  text-decoration: none;
+}
+
+
+/* --------------------------------------------------------------------------
+ * 13. Utility Classes
+ * ------------------------------------------------------------------------ */
+
+/* ---- Separators ---- */
+
+.sep {
+  color: var(--ds-text-tertiary);
+  user-select: none;
+  padding: 0 var(--ds-space-1);
+}
+
+.arrow::after {
+  content: ' →';
+}
+
+/* ---- Text utilities ---- */
+
+.text-primary   { color: var(--ds-text-primary); }
+.text-secondary { color: var(--ds-text-secondary); }
+.text-tertiary  { color: var(--ds-text-tertiary); }
+.text-accent    { color: var(--ds-primary); }
+.text-mono      { font-family: var(--ds-font-mono); }
+.text-sm        { font-size: var(--ds-text-sm); }
+.text-xs        { font-size: var(--ds-text-xs); }
+.text-lg        { font-size: var(--ds-text-lg); }
+
+/* ---- Display / layout utilities ---- */
+
+.flex            { display: flex; }
+.flex-col        { flex-direction: column; }
+.items-center    { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-1           { gap: var(--ds-space-1); }
+.gap-2           { gap: var(--ds-space-2); }
+.gap-4           { gap: var(--ds-space-4); }
+.hidden          { display: none; }
+
+/* Screen-reader-only: visually hidden, still accessible to AT */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+/* --------------------------------------------------------------------------
+ * 14. Responsive
+ * ------------------------------------------------------------------------ */
+
+@media (max-width: 768px) {
+  /* ── Hamburger: show on mobile ── */
+  .hamburger                { display: flex; }
+  .nav-links:not(.open)     { display: none; }
+  .nav-links .nav-sep       { display: none; }
+
+  /* ── Mobile Menu: full viewport width, left-aligned ── */
+  .nav-links.open {
+    align-items: flex-start;
+    padding: var(--ds-space-4);
+    /* Break out of .nav-inner container to span full viewport width */
+    width: 100vw;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .nav-links.open .nav-link {
+    width: 100%;
+    text-align: left;
+    padding: var(--ds-space-2) var(--ds-space-3);
+  }
+
+  /* Dropdowns inside mobile menu — static layout, collapsed by default */
+  .nav-links.open .dropdown {
+    position: static;
+    display: block;
+    width: 100%;
+  }
+
+  .nav-links.open .dropdown .nav-link {
+    width: 100%;
+  }
+
+  /* Sub-items hidden by default on mobile */
+  .nav-links.open .dropdown-content {
+    display: none;
+    position: static;
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    min-width: 0;
+    padding-left: var(--ds-space-6);
+  }
+
+  /* Show sub-items only when dropdown is toggled open via JS */
+  .nav-links.open .dropdown.open .dropdown-content {
+    display: block;
+  }
+
+  .nav-links.open .dropdown-content::before {
+    display: none;
+  }
+
+  .nav-links.open .dropdown-item {
+    padding: var(--ds-space-1) var(--ds-space-3);
+    color: var(--ds-text-secondary);
+  }
+
+  .nav-links.open .dropdown-item::before {
+    content: '\203A '; /* › */
+    color: var(--ds-text-tertiary);
+    font-family: var(--ds-font-mono);
+  }
+
+  /* Theme toggle in mobile menu */
+  .nav-links.open .theme-toggle {
+    margin-top: var(--ds-space-2);
+  }
+
+  /* ── Collapse all grids to single column ── */
+  .footer-grid { grid-template-columns: repeat(2, 1fr); }
+  .card-grid   { grid-template-columns: 1fr; }
+  .grid-2      { grid-template-columns: 1fr; }
+  .grid-3      { grid-template-columns: 1fr; }
+
+  /* ── Card footer: stack tags + action vertically ── */
+  .card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ds-space-2);
+  }
+
+  /* ── Cards with emoji: prevent overflow ── */
+  .card-image-layout {
+    gap: var(--ds-space-3);
+  }
+
+  .card-pixel-placeholder {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    font-size: 1.5rem;
+  }
+
+
+
+  /* ── ASCII diagrams: constrain width ── */
+  .ascii {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* ── Code blocks: ensure scroll ── */
+  pre {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* ── Terminal body: ensure scroll ── */
+  .terminal-body {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* ── Scale down large type ── */
+  :root {
+    --ds-text-4xl: 1.875rem;
+    --ds-text-5xl: 2.25rem;
+  }
+}
+
+@media (min-width: 769px) {
+  /* Force desktop layout — hide hamburger, show links */
+  .hamburger    { display: none !important; }
+  .nav-links    { display: flex !important; }
+}
