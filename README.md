@@ -32,15 +32,31 @@ GITHUB_CLIENT_SECRET=your_oauth_client_secret
 
 ## Deploy
 
+### Cloudflare Pages (Git integration)
+
+Cloudflare builds and deploys on every push to `main`.
+
+| Setting | Value |
+|---------|-------|
+| Build command | `npm run build` |
+| Build output directory | `.svelte-kit/cloudflare` |
+| Root directory | `/` |
+
+**Environment variables** (set in Cloudflare Dashboard → Settings → Environment variables):
+
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
+
+**KV namespace**: Create a KV namespace named `SESSIONS` and bind it via the Cloudflare Dashboard (Pages → Settings → Bindings). The `id` in `wrangler.toml` is a placeholder — Cloudflare resolves it at deploy time.
+
+Update your OAuth app callback URL to `https://your-domain.pages.dev/auth/callback`.
+
+### Manual deploy
+
 ```bash
 npm run build
-wrangler pages dev   # smoke test
-wrangler pages deploy .svelte-kit/cloudflare
+npm run deploy
 ```
-
-Prerequisites: Cloudflare KV namespace named `SESSIONS` (update `id` in `wrangler.toml`). Set secrets in Cloudflare dashboard: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`.
-
-Update OAuth app callback URL to `https://your-domain.pages.dev/auth/callback`.
 
 ## Commands
 
