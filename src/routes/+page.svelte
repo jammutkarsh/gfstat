@@ -4,6 +4,7 @@
 	const description =
 		"Clout-chasing, but for devs. See your GitHub mutuals, who's ghosting you, and whom you don't follow back — then fix the ratio one petty click at a time.";
 	const ogImage = `${SITE}/meme.png`;
+	const ogImageAlt = 'drake meme: rejecting checking who liked your Instagram post, approving checking who unfollowed you on GitHub';
 
 	const jsonLd = {
 		'@context': 'https://schema.org',
@@ -35,6 +36,9 @@
 	<meta property="og:title" content={title} />
 	<meta property="og:description" content={description} />
 	<meta property="og:image" content={ogImage} />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta property="og:image:alt" content={ogImageAlt} />
 	<meta property="og:url" content={SITE} />
 
 	<meta name="twitter:card" content="summary_large_image" />
@@ -42,6 +46,7 @@
 	<meta name="twitter:title" content={title} />
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={ogImage} />
+	<meta name="twitter:image:alt" content={ogImageAlt} />
 
 	{@html jsonLdScript}
 </svelte:head>
