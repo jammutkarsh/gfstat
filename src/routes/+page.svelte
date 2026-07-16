@@ -3,7 +3,7 @@
 	const title = 'gfstat — who unfollowed you, in cold hard JSON';
 	const description =
 		"Clout-chasing, but for devs. See your GitHub mutuals, who's ghosting you, and whom you don't follow back — then fix the ratio one petty click at a time.";
-	const ogImage = `${SITE}/meme.jpg`;
+	const ogImage = `${SITE}/meme.png`;
 
 	const jsonLd = {
 		'@context': 'https://schema.org',
@@ -15,6 +15,13 @@
 		operatingSystem: 'Web',
 		offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
 	};
+
+	// escape "<" so nothing in the payload can break out of the tag (script close, comment open, etc.)
+	// the closing tag is concatenated, not written literally, so it can't be mistaken for real markup
+	const jsonLdScript =
+		'<script type="application/ld+json">' +
+		JSON.stringify(jsonLd).replace(/</g, '\\u003c') +
+		'<' + '/script>';
 </script>
 
 <svelte:head>
@@ -36,7 +43,7 @@
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={ogImage} />
 
-	{@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}<\/script>`}
+	{@html jsonLdScript}
 </svelte:head>
 
 <div class="hero">
@@ -47,7 +54,7 @@
 		ratio one petty click at a time.
 	</p>
 
-	<img class="meme" src="/meme.jpg" alt="drake meme about checking github followers" width="500" height="500" />
+	<img class="meme" src="/meme.png" alt="drake meme about checking github followers" width="1200" height="630" />
 
 	<a href="/auth/login" class="btn btn-primary arrow" data-sveltekit-preload-data="off">Sign in with GitHub</a>
 </div>
